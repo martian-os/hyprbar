@@ -2,18 +2,19 @@
 
 # Compiler and flags
 CXX = clang++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O2
-LDFLAGS = -lwayland-client
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O2 -Iinclude
+LDFLAGS = -lwayland-client -lcairo -lpangocairo-1.0 -lpango-1.0
 
 # Directories
 SRC_DIR = src
 BUILD_DIR = build
 BIN_DIR = bin
 TEST_DIR = tests
+INCLUDE_DIR = include
 
 # Files
-SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
-OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+SOURCES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/*/*.cpp)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
 TARGET = $(BIN_DIR)/hyprbar
 
 # Test files
@@ -37,9 +38,10 @@ $(TARGET): $(OBJECTS)
 	@$(CXX) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 	@echo "Build complete: $(TARGET)"
 
-# Compile source files
+# Compile source files (handle subdirectories)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo "Compiling $<..."
+	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Test target
