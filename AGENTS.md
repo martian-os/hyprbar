@@ -362,3 +362,39 @@ If uncertain about:
 ---
 
 _This guide ensures quality, consistency, and prevents broken code from entering the repository._
+
+## Generating Screenshots
+
+Since hyprbar requires wlroots-based compositors (not available on GNOME), use the screenshot script to render directly from the Cairo renderer:
+
+```bash
+./scripts/screenshot.sh [output.png]
+```
+
+**How it works:**
+1. Builds project if needed
+2. Generates temporary C++ program that:
+   - Loads config from `~/.config/hyprbar/config.json`
+   - Initializes Renderer and WidgetManager
+   - Renders one frame with all widgets
+   - Saves Cairo surface directly to PNG
+3. Compiles and runs the program
+4. Outputs PNG at specified path (default: `docs/screenshot.png`)
+
+**Use cases:**
+- Documenting new features
+- Testing visual changes
+- Creating examples for README
+- CI/CD visual regression tests
+
+**Example:**
+```bash
+# Generate screenshot with current config
+./scripts/screenshot.sh docs/new-feature.png
+
+# Test different config
+cp examples/config-dracula.json ~/.config/hyprbar/config.json
+./scripts/screenshot.sh docs/dracula-theme.png
+```
+
+**Note:** Screenshot shows actual rendering but doesn't include compositor effects (shadows, transparency) or live updates. For full testing, use actual Hyprland/Sway.
