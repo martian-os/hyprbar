@@ -25,6 +25,10 @@ bool ClockWidget::initialize(const ConfigValue& config) {
         font_size_ = obj.at("size").double_value;
     }
 
+    if (obj.count("color")) {
+        color_ = obj.at("color").string_value;
+    }
+
     current_time_ = format_time();
     Logger::instance().debug("Clock widget initialized");
     return true;
@@ -49,7 +53,7 @@ bool ClockWidget::update() {
 
 void ClockWidget::render(Renderer& renderer, int x, int y, 
                         int /*width*/, int height) {
-    Color fg{1.0, 1.0, 1.0, 1.0};  // White text
+    Color fg = Color::from_hex(color_);
     double text_y = y + (height / 2.0) + (font_size_ / 3.0);
     renderer.draw_text(current_time_, x, text_y, font_, font_size_, fg);
 }
