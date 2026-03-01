@@ -1,48 +1,34 @@
 #include "hyprbar/core/event_loop.h"
 #include "hyprbar/core/logger.h"
 #include "hyprbar/core/config_manager.h"
+#include "hyprbar/wayland/wayland_manager.h"
 #include <iostream>
-#include <wayland-client.h>
-#include <string>
-#include <cstring>
 #include <memory>
 #include <sys/epoll.h>
+#include <csignal>
 
 using namespace hyprbar;
 
-// Global Wayland objects
-static struct wl_display *display = nullptr;
-static struct wl_compositor *compositor = nullptr;
-static struct wl_surface *surface = nullptr;
 static std::unique_ptr<EventLoop> event_loop = nullptr;
+static std::unique_ptr<WaylandManager> wayland = nullptr;
 
-// Registry listener to bind Wayland globals
-static void registry_handle_global(void* /*data*/, struct wl_registry *registry,
-                                   uint32_t name, const char *interface,
-                                   uint32_t /*version*/) {
-    if (strcmp(interface, wl_compositor_interface.name) == 0) {
-        compositor = static_cast<struct wl_compositor*>(
-            wl_registry_bind(registry, name, &wl_compositor_interface, 4));
+void signal_handler(int /*sig*/) {
+    Logger::instance().info("Received shutdown signal");
+    if (event_loop) {
+        event_loop->shutdown();
     }
 }
 
-static void registry_handle_global_remove(void* /*data*/,
-                                          struct wl_registry* /*registry*/,
-                                          uint32_t /*name*/) {
-    // Handle global removal if needed
-}
-
-static const struct wl_registry_listener registry_listener = {
-    registry_handle_global,
-    registry_handle_global_remove,
-};
-
 int main(int /*argc*/, char** /*argv*/) {
+    // Set up signal handlers
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
     // Initialize logger
     Logger::instance().set_level(Logger::Level::Debug);
     Logger::instance().info("Hyprbar v0.1.0 starting...");
 
-    // Load configuration (use default if not found)
+    // Load configuration
     ConfigManager config_mgr;
     std::string config_path = ConfigManager::get_default_config_path();
     
@@ -63,52 +49,42 @@ int main(int /*argc*/, char** /*argv*/) {
         return 1;
     }
 
-    // Connect to Wayland display
-    display = wl_display_connect(nullptr);
-    if (!display) {
-        Logger::instance().error("Could not connect to Wayland display");
+    // Initialize Wayland
+    wayland = std::make_unique<WaylandManager>();
+    if (!wayland->initialize()) {
+        Logger::instance().error("Wayland initialization failed");
         return 1;
     }
 
-    Logger::instance().info("Connected to Wayland display");
+    // Create bar surface
+    WaylandManager::BarPosition position;
+    switch (config.bar.position) {
+        case BarConfig::Position::Top:    position = WaylandManager::BarPosition::Top; break;
+        case BarConfig::Position::Bottom: position = WaylandManager::BarPosition::Bottom; break;
+        case BarConfig::Position::Left:   position = WaylandManager::BarPosition::Left; break;
+        case BarConfig::Position::Right:  position = WaylandManager::BarPosition::Right; break;
+    }
 
-    // Get registry and add listener
-    struct wl_registry *registry = wl_display_get_registry(display);
-    wl_registry_add_listener(registry, &registry_listener, nullptr);
-
-    // Roundtrip to get all globals
-    wl_display_roundtrip(display);
-
-    if (!compositor) {
-        Logger::instance().error("Could not bind compositor");
-        wl_display_disconnect(display);
+    if (!wayland->create_bar_surface(position, 0, config.bar.height)) {
+        Logger::instance().error("Failed to create bar surface");
         return 1;
     }
 
-    Logger::instance().info("Compositor bound successfully");
+    // Set exclusive zone
+    wayland->set_exclusive_zone(config.bar.height);
 
-    // Create a surface
-    surface = wl_compositor_create_surface(compositor);
-    if (!surface) {
-        Logger::instance().error("Could not create surface");
-        wl_display_disconnect(display);
-        return 1;
-    }
-
-    Logger::instance().info("Surface created");
-
-    // Add Wayland display fd to event loop
-    int wayland_fd = wl_display_get_fd(display);
+    // Add Wayland fd to event loop
+    int wayland_fd = wayland->get_fd();
     event_loop->add_fd(wayland_fd, EPOLLIN, [](int /*fd*/, uint32_t /*events*/) {
-        if (wl_display_dispatch(display) < 0) {
+        if (wayland->dispatch() < 0) {
             Logger::instance().error("Wayland dispatch error");
             event_loop->shutdown();
         }
     });
 
-    // Add a test timer (prints every 2 seconds)
-    event_loop->add_timer(std::chrono::milliseconds(2000), []() {
-        Logger::instance().debug("Heartbeat - bar running");
+    // Add heartbeat timer
+    event_loop->add_timer(std::chrono::milliseconds(5000), []() {
+        Logger::instance().debug("Bar running (heartbeat)");
     });
 
     Logger::instance().info("Event loop starting...");
@@ -116,21 +92,14 @@ int main(int /*argc*/, char** /*argv*/) {
     // Main event loop
     while (event_loop->dispatch()) {
         // Prepare Wayland events
-        while (wl_display_prepare_read(display) != 0) {
-            wl_display_dispatch_pending(display);
+        while (wayland->prepare_read() != 0) {
+            wayland->dispatch_pending();
         }
-        wl_display_flush(display);
-        wl_display_read_events(display);
-        wl_display_dispatch_pending(display);
+        wayland->flush();
+        wayland->read_events();
+        wayland->dispatch_pending();
     }
 
     Logger::instance().info("Shutting down...");
-
-    // Cleanup
-    if (surface) wl_surface_destroy(surface);
-    if (compositor) wl_compositor_destroy(compositor);
-    if (registry) wl_registry_destroy(registry);
-    wl_display_disconnect(display);
-
     return 0;
 }

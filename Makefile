@@ -11,10 +11,13 @@ BUILD_DIR = build
 BIN_DIR = bin
 TEST_DIR = tests
 INCLUDE_DIR = include
+PROTOCOL_DIR = protocol
 
 # Files
 SOURCES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/*/*.cpp)
-OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
+PROTOCOL_SOURCES = $(wildcard $(PROTOCOL_DIR)/*.c)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES)) \
+          $(patsubst $(PROTOCOL_DIR)/%.c,$(BUILD_DIR)/protocol_%.o,$(PROTOCOL_SOURCES))
 TARGET = $(BIN_DIR)/hyprbar
 
 # Test files
@@ -43,6 +46,12 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo "Compiling $<..."
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Compile protocol C files with C compiler to avoid unused warnings
+$(BUILD_DIR)/protocol_%.o: $(PROTOCOL_DIR)/%.c
+	@echo "Compiling protocol $<..."
+	@mkdir -p $(dir $@)
+	@gcc -fPIC -c $< -o $@
 
 # Test target
 test: dirs $(TEST_TARGET)

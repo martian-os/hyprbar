@@ -17,8 +17,8 @@ Last Updated: 2026-03-01 18:22
 | GitHub CI | ✅ | Build + test on PRs |
 | GitHub Release | ✅ | Auto-release on tags |
 | Event Loop | ✅ | epoll-based with timer support, integrated with Wayland |
-| Config Manager | ⏳ | JSON/TOML parsing |
-| Logging System | ⏳ | Severity levels, formatting |
+| Config Manager | ✅ | JSON parser, bar + widget config, default path support |
+| Logging System | ✅ | Thread-safe, colored output, severity levels, formatted logging |
 
 ## Phase 2: Wayland Integration
 

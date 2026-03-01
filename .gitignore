@@ -30,3 +30,4 @@ coverage*.out
 # Profiling
 *.prof
 *.pprof
+protocol/
