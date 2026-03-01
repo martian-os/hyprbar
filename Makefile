@@ -105,3 +105,12 @@ help:
 	@echo "  install   - Install to /usr/local/bin"
 	@echo "  uninstall - Remove from /usr/local/bin"
 	@echo "  help      - Show this help message"
+
+lint:
+	@echo "Running clang-tidy on all source files..."
+	@find src -name "*.cpp" | while read file; do \
+		echo "Checking $$file..."; \
+		clang-tidy "$$file" -header-filter='include/.*' -- $(CXXFLAGS) 2>&1 | \
+		grep -E "(error:|warning:.*function.*too long|warning:.*file.*too long)" || true; \
+	done
+	@echo "Lint complete"
