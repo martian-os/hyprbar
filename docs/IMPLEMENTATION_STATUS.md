@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last Updated: 2026-03-01
+Last Updated: 2026-03-01 18:22
 
 ## Legend
 - ✅ Complete
@@ -13,10 +13,10 @@ Last Updated: 2026-03-01
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Project Structure | ✅ | Complete with src/, tests/, docs/ |
-| Makefile | ✅ | Build, test, debug, release targets |
+| Makefile | ✅ | Build, test, debug, release targets + subdirectory support |
 | GitHub CI | ✅ | Build + test on PRs |
 | GitHub Release | ✅ | Auto-release on tags |
-| Event Loop | ⏳ | epoll-based, timer support needed |
+| Event Loop | ✅ | epoll-based with timer support, integrated with Wayland |
 | Config Manager | ⏳ | JSON/TOML parsing |
 | Logging System | ⏳ | Severity levels, formatting |
 
