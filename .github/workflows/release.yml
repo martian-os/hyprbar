@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-release:
+    name: Build Release Binary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang libwayland-dev make
+
+      - name: Build release binary
+        run: make release
+
+      - name: Get tag name
+        id: get_tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release archive
+        run: |
+          mkdir -p release
+          cp bin/hyprbar release/
+          cp README.md LICENSE release/ 2>/dev/null || true
+          cd release
+          tar -czf ../hyprbar-${{ steps.get_tag.outputs.TAG }}-linux-x86_64.tar.gz *
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: hyprbar-${{ steps.get_tag.outputs.TAG }}-linux-x86_64.tar.gz
+          body: |
+            ## Release ${{ steps.get_tag.outputs.TAG }}
+            
+            Binary release for Linux x86_64.
+            
+            ### Installation
+            ```bash
+            tar -xzf hyprbar-${{ steps.get_tag.outputs.TAG }}-linux-x86_64.tar.gz
+            sudo cp hyprbar /usr/local/bin/
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
