@@ -24,7 +24,12 @@ bool ScriptWidget::initialize(const ConfigValue& config) {
     command_ = obj.at("command").string_value;
 
     if (obj.count("interval")) {
-        interval_ms_ = static_cast<int>(obj.at("interval").double_value);
+        const auto& interval_val = obj.at("interval");
+        if (interval_val.type == ConfigValue::Type::Integer) {
+            interval_ms_ = static_cast<int>(interval_val.int_value);
+        } else if (interval_val.type == ConfigValue::Type::Double) {
+            interval_ms_ = static_cast<int>(interval_val.double_value);
+        }
     }
 
     if (obj.count("font")) {
@@ -32,7 +37,12 @@ bool ScriptWidget::initialize(const ConfigValue& config) {
     }
 
     if (obj.count("size")) {
-        font_size_ = obj.at("size").double_value;
+        const auto& size_val = obj.at("size");
+        if (size_val.type == ConfigValue::Type::Integer) {
+            font_size_ = static_cast<double>(size_val.int_value);
+        } else if (size_val.type == ConfigValue::Type::Double) {
+            font_size_ = size_val.double_value;
+        }
     }
 
     if (obj.count("color")) {

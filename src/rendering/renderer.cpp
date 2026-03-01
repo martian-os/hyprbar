@@ -125,6 +125,13 @@ void Renderer::fill_rect(double x, double y, double w, double h, const Color& co
 
 void Renderer::draw_text(const std::string& text, double x, double y,
                          const std::string& font, double size, const Color& color) {
+    if (text.empty()) {
+        Logger::instance().warn("Empty text at ({}, {})", x, y);
+        return;
+    }
+    
+    Logger::instance().debug("draw_text('{}', {}, {}, size={})", text, x, y, size);
+    
     cairo_save(cr_);
     
     cairo_select_font_face(cr_, font.c_str(),

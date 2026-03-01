@@ -58,8 +58,11 @@ bool WidgetManager::update() {
 
 void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
     if (widgets_.empty()) {
+        Logger::instance().warn("No widgets to render");
         return;
     }
+
+    Logger::instance().debug("Rendering {} widgets", widgets_.size());
 
     // Simple left-to-right layout with 10px spacing
     int x = 10;
@@ -68,6 +71,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
     for (auto& slot : widgets_) {
         int widget_width = slot.widget->get_desired_width();
         int widget_height = slot.widget->get_desired_height();
+        
+        Logger::instance().debug("Widget at x={}, width={}", x, widget_width);
         
         if (widget_height == 0) {
             widget_height = bar_height;
@@ -82,6 +87,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
         
         x += widget_width + spacing;
     }
+    
+    Logger::instance().debug("Rendering complete, used {} pixels", x);
 }
 
 void WidgetManager::on_click(int x, int y, uint32_t button) {

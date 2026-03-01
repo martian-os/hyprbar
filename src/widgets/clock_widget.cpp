@@ -8,6 +8,7 @@ namespace hyprbar {
 
 bool ClockWidget::initialize(const ConfigValue& config) {
     if (config.type != ConfigValue::Type::Object) {
+        Logger::instance().warn("Clock widget got non-object config");
         return true;  // Use defaults
     }
 
@@ -22,7 +23,15 @@ bool ClockWidget::initialize(const ConfigValue& config) {
     }
 
     if (obj.count("size")) {
-        font_size_ = obj.at("size").double_value;
+        const auto& size_val = obj.at("size");
+        if (size_val.type == ConfigValue::Type::Integer) {
+            font_size_ = static_cast<double>(size_val.int_value);
+        } else if (size_val.type == ConfigValue::Type::Double) {
+            font_size_ = size_val.double_value;
+        }
+        Logger::instance().debug("Clock font size set to {}", font_size_);
+    } else {
+        Logger::instance().debug("Clock using default font size {}", font_size_);
     }
 
     if (obj.count("color")) {

@@ -7,8 +7,9 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
-#include <sys/epoll.h>
 #include <csignal>
+#include <sys/epoll.h>
+#include <cairo/cairo.h>
 
 using namespace hyprbar;
 
@@ -18,10 +19,7 @@ struct AppState {
     std::unique_ptr<WaylandManager> wayland;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<WidgetManager> widget_manager;
-    wl_buffer* buffer = nullptr;
-    void* buffer_data = nullptr;
-    uint32_t bar_width = 1920;
-    uint32_t bar_height = 32;
+    Config config;
 };
 
 static AppState app;
@@ -33,33 +31,65 @@ void signal_handler(int /*sig*/) {
     }
 }
 
-void render_frame(const Config& config) {
-    if (!app.renderer || !app.wayland || !app.buffer || !app.buffer_data) {
+void render_frame(void* wayland_buffer) {
+    if (!app.renderer) {
         return;
     }
 
     app.renderer->begin_frame();
 
-    Color bg = Color::from_hex(config.bar.background);
+    Color bg = Color::from_hex(app.config.bar.background);
     app.renderer->clear(bg);
 
     // Render widgets
     if (app.widget_manager) {
-        app.widget_manager->render(*app.renderer, app.bar_width, app.bar_height);
+        app.widget_manager->render(*app.renderer, 1920, app.config.bar.height);
     }
 
     app.renderer->end_frame();
 
-    memcpy(app.buffer_data, app.renderer->get_buffer_data(),
-                app.renderer->get_buffer_size());
-    app.wayland->attach_and_commit(app.buffer);
+    // Copy to Wayland buffer if provided
+    if (wayland_buffer) {
+        std::memcpy(wayland_buffer, app.renderer->get_buffer_data(),
+                    app.renderer->get_buffer_size());
+    }
 }
 
-bool initialize_wayland(const Config& config) {
+int run_screenshot_mode(const std::string& output_path, const Config& config) {
+    Logger::instance().info("Screenshot mode: {}", output_path);
+
+    // Initialize renderer
+    app.renderer = std::make_unique<Renderer>();
+    if (!app.renderer->initialize(1920, config.bar.height)) {
+        Logger::instance().error("Failed to initialize renderer");
+        return 1;
+    }
+
+    // Initialize widgets
+    ConfigManager config_mgr;
+    config_mgr.load(ConfigManager::get_default_config_path());
+    app.widget_manager = std::make_unique<WidgetManager>();
+    app.widget_manager->initialize(config_mgr);
+    app.widget_manager->update();
+
+    // Render one frame
+    render_frame(nullptr);
+
+    // Save directly from renderer's Cairo surface
+    cairo_surface_write_to_png(cairo_get_target(app.renderer->get_context()), 
+                                output_path.c_str());
+    Logger::instance().info("Screenshot saved to: {}", output_path);
+
+    return 0;
+}
+
+int run_wayland_mode(const Config& config) {
+    Logger::instance().info("Wayland mode starting...");
+
     app.wayland = std::make_unique<WaylandManager>();
     if (!app.wayland->initialize()) {
         Logger::instance().error("Wayland initialization failed");
-        return false;
+        return 1;
     }
 
     WaylandManager::BarPosition position;
@@ -72,41 +102,36 @@ bool initialize_wayland(const Config& config) {
 
     if (!app.wayland->create_bar_surface(position, 0, config.bar.height)) {
         Logger::instance().error("Failed to create bar surface");
-        return false;
+        return 1;
     }
 
     app.wayland->set_exclusive_zone(config.bar.height);
-    app.bar_height = config.bar.height;
-    return true;
-}
 
-bool initialize_renderer(const Config& config) {
+    // Initialize renderer
     app.renderer = std::make_unique<Renderer>();
-    if (!app.renderer->initialize(app.bar_width, config.bar.height)) {
+    if (!app.renderer->initialize(1920, config.bar.height)) {
         Logger::instance().error("Failed to initialize renderer");
-        return false;
+        return 1;
     }
 
-    app.buffer = app.wayland->create_buffer(
-        app.renderer->get_buffer_size(), &app.buffer_data);
-    if (!app.buffer || !app.buffer_data) {
+    // Create Wayland buffer
+    void* buffer_data = nullptr;
+    wl_buffer* buffer = app.wayland->create_buffer(
+        app.renderer->get_buffer_size(), &buffer_data);
+    if (!buffer || !buffer_data) {
         Logger::instance().error("Failed to create Wayland buffer");
-        return false;
+        return 1;
     }
 
-    return true;
-}
-
-bool initialize_widgets(const ConfigManager& config_mgr) {
+    // Initialize widgets
+    ConfigManager config_mgr;
+    config_mgr.load(ConfigManager::get_default_config_path());
     app.widget_manager = std::make_unique<WidgetManager>();
-    if (!app.widget_manager->initialize(config_mgr)) {
-        Logger::instance().warn("No widgets initialized");
-        return false;
-    }
-    return true;
-}
+    app.widget_manager->initialize(config_mgr);
 
-void setup_event_loop(const Config& config) {
+    // Setup event loop
+    app.event_loop = std::make_unique<EventLoop>();
+    
     int wayland_fd = app.wayland->get_fd();
     app.event_loop->add_fd(wayland_fd, EPOLLIN, [](int /*fd*/, uint32_t /*events*/) {
         if (app.wayland->dispatch() < 0) {
@@ -115,54 +140,18 @@ void setup_event_loop(const Config& config) {
         }
     });
 
-    app.event_loop->add_timer(std::chrono::milliseconds(1000), [&config]() {
+    app.event_loop->add_timer(std::chrono::milliseconds(1000), [buffer, buffer_data]() {
         if (app.widget_manager && app.widget_manager->update()) {
-            render_frame(config);
+            render_frame(buffer_data);
+            app.wayland->attach_and_commit(buffer);
         }
     });
-}
 
-int main(int /*argc*/, char** /*argv*/) {
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-
-    Logger::instance().set_level(Logger::Level::Debug);
-    Logger::instance().info("Hyprbar v0.1.0 starting...");
-
-    ConfigManager config_mgr;
-    std::string config_path = ConfigManager::get_default_config_path();
-    
-    if (!config_mgr.load(config_path)) {
-        Logger::instance().warn("Could not load config from {}, using defaults", config_path);
-    }
-
-    const auto& config = config_mgr.get_config();
-    Logger::instance().debug("Bar height: {}", config.bar.height);
-    Logger::instance().debug("Widgets configured: {}", config.widgets.size());
-
-    try {
-        app.event_loop = std::make_unique<EventLoop>();
-        Logger::instance().debug("Event loop initialized");
-    } catch (const std::exception& e) {
-        Logger::instance().error("Failed to create event loop: {}", e.what());
-        return 1;
-    }
-
-    if (!initialize_wayland(config)) {
-        return 1;
-    }
-
-    if (!initialize_renderer(config)) {
-        return 1;
-    }
-
-    initialize_widgets(config_mgr);
-
-    render_frame(config);
-    setup_event_loop(config);
+    // Initial render
+    render_frame(buffer_data);
+    app.wayland->attach_and_commit(buffer);
 
     Logger::instance().info("Event loop starting...");
-
     while (app.event_loop->dispatch()) {
         while (app.wayland->prepare_read() != 0) {
             app.wayland->dispatch_pending();
@@ -172,6 +161,52 @@ int main(int /*argc*/, char** /*argv*/) {
         app.wayland->dispatch_pending();
     }
 
-    Logger::instance().info("Shutting down...");
     return 0;
+}
+
+void print_usage(const char* program) {
+    std::cout << "Usage: " << program << " [OPTIONS]\n\n"
+              << "Options:\n"
+              << "  --screenshot <path>   Generate screenshot to file (no compositor needed)\n"
+              << "  --help                Show this help\n\n"
+              << "Without options, runs in normal Wayland mode.\n";
+}
+
+int main(int argc, char** argv) {
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
+    Logger::instance().set_level(Logger::Level::Debug);
+    Logger::instance().info("Hyprbar v0.1.0");
+
+    // Parse arguments
+    std::string screenshot_path;
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "--screenshot" && i + 1 < argc) {
+            screenshot_path = argv[++i];
+        } else if (arg == "--help") {
+            print_usage(argv[0]);
+            return 0;
+        } else {
+            std::cerr << "Unknown option: " << arg << "\n";
+            print_usage(argv[0]);
+            return 1;
+        }
+    }
+
+    // Load config
+    ConfigManager config_mgr;
+    std::string config_path = ConfigManager::get_default_config_path();
+    if (!config_mgr.load(config_path)) {
+        Logger::instance().warn("Could not load config from {}, using defaults", config_path);
+    }
+    app.config = config_mgr.get_config();
+
+    // Run in appropriate mode
+    if (!screenshot_path.empty()) {
+        return run_screenshot_mode(screenshot_path, app.config);
+    } else {
+        return run_wayland_mode(app.config);
+    }
 }
