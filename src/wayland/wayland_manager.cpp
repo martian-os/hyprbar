@@ -3,6 +3,9 @@
 #include "hyprbar/wayland/layer_shell_protocol.h"
 #include <cstring>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <errno.h>
 
 namespace hyprbar {
 
@@ -184,6 +187,55 @@ int WaylandManager::read_events() {
 
 int WaylandManager::dispatch_pending() {
     return display_ ? wl_display_dispatch_pending(display_) : -1;
+}
+
+wl_buffer* WaylandManager::create_buffer(size_t size, void** data) {
+    // Create anonymous file
+    int fd = memfd_create("hyprbar-buffer", MFD_CLOEXEC);
+    if (fd < 0) {
+        Logger::instance().error("Failed to create memfd: {}", strerror(errno));
+        return nullptr;
+    }
+
+    // Set size
+    if (ftruncate(fd, size) < 0) {
+        Logger::instance().error("Failed to truncate memfd: {}", strerror(errno));
+        close(fd);
+        return nullptr;
+    }
+
+    // Map memory
+    void* pool_data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (pool_data == MAP_FAILED) {
+        Logger::instance().error("Failed to mmap buffer: {}", strerror(errno));
+        close(fd);
+        return nullptr;
+    }
+
+    // Create wl_shm_pool
+    wl_shm_pool* pool = wl_shm_create_pool(shm_, fd, size);
+    close(fd);  // Can close fd after creating pool
+
+    // Create buffer from pool
+    wl_buffer* buffer = wl_shm_pool_create_buffer(pool, 0, 
+        0, 0,  // Will be set by layer shell
+        size, WL_SHM_FORMAT_ARGB8888);
+
+    wl_shm_pool_destroy(pool);
+
+    if (data) {
+        *data = pool_data;
+    }
+
+    Logger::instance().debug("Created wl_buffer: {} bytes", size);
+    return buffer;
+}
+
+void WaylandManager::attach_and_commit(wl_buffer* buffer) {
+    wl_surface_attach(surface_, buffer, 0, 0);
+    wl_surface_damage_buffer(surface_, 0, 0, INT32_MAX, INT32_MAX);
+    wl_surface_commit(surface_);
+    Logger::instance().debug("Buffer attached and surface committed");
 }
 
 // Registry callbacks
