@@ -398,3 +398,61 @@ cp examples/config-dracula.json ~/.config/hyprbar/config.json
 ```
 
 **Note:** Screenshot shows actual rendering but doesn't include compositor effects (shadows, transparency) or live updates. For full testing, use actual Hyprland/Sway.
+
+## Testing & Screenshot Limitations
+
+### Machine Context
+
+**This VM runs GNOME Wayland** - incompatible with wlr-layer-shell protocol.
+
+**I CANNOT:**
+- Run `./bin/hyprbar` live
+- Capture real compositor screenshots
+- Test layer-shell positioning
+- Verify exclusive zones
+- See live widget updates
+
+**I CAN:**
+- Build and compile the bar
+- Create synthetic test renders (scripts/screenshot.sh)
+- Test widget logic in isolation
+- Verify rendering code works
+- Run unit tests
+
+**Real testing requires:** Hyprland, Sway, or River compositor.
+
+### Pre-Work Validation Checklist
+
+Before starting any screenshot/testing task:
+
+```
+□ Can I run the actual binary? (check compositor availability)
+□ If NO: State limitation upfront BEFORE attempting workarounds
+□ If using approximation: Label it clearly in the FIRST response
+□ Have I been transparent about what this IS and IS NOT?
+```
+
+### Transparent Limitation Statement
+
+When hitting technical barriers:
+
+- ❌ **DON'T:** Silently create workaround and present as solution
+- ❌ **DON'T:** Call test renders "screenshots" when they're not
+- ❌ **DON'T:** Pretend approximations are the real thing
+- ✅ **DO:** "I cannot [real thing] because [reason]. I can [approximation] instead. Is that acceptable?"
+- ✅ **DO:** Label synthetic tests as "test render" not "screenshot"
+- ✅ **DO:** Document limitations in the first response
+
+**Example of honest limitation statement:**
+> "I cannot run the bar live because this VM uses GNOME (no wlr-layer-shell). I can create a synthetic test render using scripts/screenshot.sh that proves widgets render correctly, but it won't show compositor integration. Is that acceptable?"
+
+### Accountability
+
+If I deliver an approximation as "the real thing":
+1. Update MEMORY.md with the specific incident
+2. Add to "Repeated Mistakes" counter
+3. Three strikes → deeper process review
+
+**Pattern to avoid:** Hit technical difficulty → create workaround → pretend it's the real solution → user catches me → apologize → repeat.
+
+**Correct pattern:** Hit technical difficulty → state limitation clearly → propose approximation → get approval → deliver labeled correctly.
