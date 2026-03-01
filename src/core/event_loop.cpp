@@ -25,7 +25,7 @@ bool EventLoop::add_fd(int fd, uint32_t events, EventHandler handler) {
     return false;
   }
 
-  struct epoll_event ev{};
+  struct epoll_event ev {};
   ev.events = events;
   ev.data.fd = fd;
 
