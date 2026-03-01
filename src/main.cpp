@@ -3,12 +3,12 @@
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/wayland/wayland_manager.h"
 #include "hyprbar/rendering/renderer.h"
+#include "hyprbar/widgets/widget_manager.h"
 #include <iostream>
 #include <memory>
+#include <cstring>
 #include <sys/epoll.h>
 #include <csignal>
-#include <ctime>
-#include <cstring>
 
 using namespace hyprbar;
 
@@ -17,9 +17,11 @@ struct AppState {
     std::unique_ptr<EventLoop> event_loop;
     std::unique_ptr<WaylandManager> wayland;
     std::unique_ptr<Renderer> renderer;
+    std::unique_ptr<WidgetManager> widget_manager;
     wl_buffer* buffer = nullptr;
     void* buffer_data = nullptr;
     uint32_t bar_width = 1920;
+    uint32_t bar_height = 32;
 };
 
 static AppState app;
@@ -29,38 +31,6 @@ void signal_handler(int /*sig*/) {
     if (app.event_loop) {
         app.event_loop->shutdown();
     }
-}
-
-void render_text_left(const Config& config, double y_center) {
-    Color fg = Color::from_hex(config.bar.foreground);
-    app.renderer->draw_text("Hyprbar v0.1.0", 10, y_center,
-                           "monospace", 14, fg);
-}
-
-void render_text_center(const Config& config, double y_center) {
-    Color fg = Color::from_hex(config.bar.foreground);
-    
-    time_t now = time(nullptr);
-    struct tm* tm_info = localtime(&now);
-    char time_buf[64];
-    strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", tm_info);
-    
-    cairo_text_extents_t extents;
-    cairo_text_extents(app.renderer->get_context(), time_buf, &extents);
-    double center_x = (app.bar_width - extents.width) / 2.0;
-    app.renderer->draw_text(time_buf, center_x, y_center,
-                           "monospace", 14, fg);
-}
-
-void render_text_right(const Config& config, double y_center) {
-    Color fg = Color::from_hex(config.bar.foreground);
-    std::string status = "Phase 3: Rendering Complete ✓";
-    
-    cairo_text_extents_t extents;
-    cairo_text_extents(app.renderer->get_context(), status.c_str(), &extents);
-    double right_x = app.bar_width - extents.width - 10;
-    app.renderer->draw_text(status, right_x, y_center,
-                           "monospace", 14, fg);
 }
 
 void render_frame(const Config& config) {
@@ -73,14 +43,14 @@ void render_frame(const Config& config) {
     Color bg = Color::from_hex(config.bar.background);
     app.renderer->clear(bg);
 
-    double y_center = config.bar.height / 2.0 + 5.0;
-    render_text_left(config, y_center);
-    render_text_center(config, y_center);
-    render_text_right(config, y_center);
+    // Render widgets
+    if (app.widget_manager) {
+        app.widget_manager->render(*app.renderer, app.bar_width, app.bar_height);
+    }
 
     app.renderer->end_frame();
 
-    std::memcpy(app.buffer_data, app.renderer->get_buffer_data(),
+    memcpy(app.buffer_data, app.renderer->get_buffer_data(),
                 app.renderer->get_buffer_size());
     app.wayland->attach_and_commit(app.buffer);
 }
@@ -106,6 +76,7 @@ bool initialize_wayland(const Config& config) {
     }
 
     app.wayland->set_exclusive_zone(config.bar.height);
+    app.bar_height = config.bar.height;
     return true;
 }
 
@@ -126,6 +97,15 @@ bool initialize_renderer(const Config& config) {
     return true;
 }
 
+bool initialize_widgets(const ConfigManager& config_mgr) {
+    app.widget_manager = std::make_unique<WidgetManager>();
+    if (!app.widget_manager->initialize(config_mgr)) {
+        Logger::instance().warn("No widgets initialized");
+        return false;
+    }
+    return true;
+}
+
 void setup_event_loop(const Config& config) {
     int wayland_fd = app.wayland->get_fd();
     app.event_loop->add_fd(wayland_fd, EPOLLIN, [](int /*fd*/, uint32_t /*events*/) {
@@ -136,7 +116,9 @@ void setup_event_loop(const Config& config) {
     });
 
     app.event_loop->add_timer(std::chrono::milliseconds(1000), [&config]() {
-        render_frame(config);
+        if (app.widget_manager && app.widget_manager->update()) {
+            render_frame(config);
+        }
     });
 }
 
@@ -173,6 +155,8 @@ int main(int /*argc*/, char** /*argv*/) {
     if (!initialize_renderer(config)) {
         return 1;
     }
+
+    initialize_widgets(config_mgr);
 
     render_frame(config);
     setup_event_loop(config);
