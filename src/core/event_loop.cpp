@@ -110,17 +110,24 @@ void EventLoop::process_timers() {
         }
 
         if (now >= timer.next_expiry) {
-            timer.callback();
-            
-            if (timer.repeating) {
-                timer.next_expiry = now + timer.interval;
-            } else {
-                timer.cancelled = true;
-            }
+            handle_expired_timer(timer, now);
         }
     }
 
-    // Remove cancelled timers
+    remove_cancelled_timers();
+}
+
+void EventLoop::handle_expired_timer(Timer& timer, TimePoint now) {
+    timer.callback();
+    
+    if (timer.repeating) {
+        timer.next_expiry = now + timer.interval;
+    } else {
+        timer.cancelled = true;
+    }
+}
+
+void EventLoop::remove_cancelled_timers() {
     timers_.erase(
         std::remove_if(timers_.begin(), timers_.end(),
             [](const Timer& t) { return t.cancelled; }),
