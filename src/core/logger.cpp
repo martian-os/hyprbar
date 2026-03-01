@@ -79,8 +79,8 @@ void Logger::log(Level level, const std::string& message) {
   std::string color = level_color(level);
   std::string reset = colored_ ? "\033[0m" : "";
 
-  *output_ << color << "[" << timestamp() << "] " << "["
-      << level_string(level) << "] " << message << reset << std::endl;
+  *output_ << color << "[" << timestamp() << "] " << "[" << level_string(level)
+           << "] " << message << reset << std::endl;
 }
 
 } // namespace hyprbar
