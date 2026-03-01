@@ -53,15 +53,47 @@ WaylandManager::WaylandManager()
 }
 
 WaylandManager::~WaylandManager() {
-    if (pointer_) wl_pointer_destroy(pointer_);
-    if (seat_) wl_seat_destroy(seat_);
-    if (layer_surface_) zwlr_layer_surface_v1_destroy(layer_surface_);
-    if (surface_) wl_surface_destroy(surface_);
-    if (layer_shell_) zwlr_layer_shell_v1_destroy(layer_shell_);
-    if (shm_) wl_shm_destroy(shm_);
-    if (compositor_) wl_compositor_destroy(compositor_);
-    if (registry_) wl_registry_destroy(registry_);
-    if (display_) wl_display_disconnect(display_);
+    cleanup();
+    
+    if (display_) {
+        wl_display_disconnect(display_);
+        display_ = nullptr;
+    }
+}
+
+void WaylandManager::cleanup() {
+    if (pointer_) {
+        wl_pointer_destroy(pointer_);
+        pointer_ = nullptr;
+    }
+    if (seat_) {
+        wl_seat_destroy(seat_);
+        seat_ = nullptr;
+    }
+    if (layer_surface_) {
+        zwlr_layer_surface_v1_destroy(layer_surface_);
+        layer_surface_ = nullptr;
+    }
+    if (surface_) {
+        wl_surface_destroy(surface_);
+        surface_ = nullptr;
+    }
+    if (layer_shell_) {
+        zwlr_layer_shell_v1_destroy(layer_shell_);
+        layer_shell_ = nullptr;
+    }
+    if (shm_) {
+        wl_shm_destroy(shm_);
+        shm_ = nullptr;
+    }
+    if (compositor_) {
+        wl_compositor_destroy(compositor_);
+        compositor_ = nullptr;
+    }
+    if (registry_) {
+        wl_registry_destroy(registry_);
+        registry_ = nullptr;
+    }
 }
 
 bool WaylandManager::initialize() {
@@ -120,36 +152,7 @@ bool WaylandManager::create_bar_surface(BarPosition position, uint32_t width, ui
         return false;
     }
 
-    // Set layer surface properties
-    uint32_t anchor = 0;
-    switch (position) {
-        case BarPosition::Top:
-            anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-            zwlr_layer_surface_v1_set_size(layer_surface_, 0, height);
-            break;
-        case BarPosition::Bottom:
-            anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-            zwlr_layer_surface_v1_set_size(layer_surface_, 0, height);
-            break;
-        case BarPosition::Left:
-            anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
-            zwlr_layer_surface_v1_set_size(layer_surface_, width, 0);
-            break;
-        case BarPosition::Right:
-            anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
-                    ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
-            zwlr_layer_surface_v1_set_size(layer_surface_, width, 0);
-            break;
-    }
-
-    zwlr_layer_surface_v1_set_anchor(layer_surface_, anchor);
+    configure_layer_surface(position, width, height);
     zwlr_layer_surface_v1_add_listener(layer_surface_, &layer_surface_listener, this);
 
     wl_surface_commit(surface_);
@@ -157,6 +160,44 @@ bool WaylandManager::create_bar_surface(BarPosition position, uint32_t width, ui
 
     Logger::instance().info("Bar surface created");
     return true;
+}
+
+uint32_t WaylandManager::calculate_anchor(BarPosition position) const {
+    switch (position) {
+        case BarPosition::Top:
+            return ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+        case BarPosition::Bottom:
+            return ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+        case BarPosition::Left:
+            return ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+        case BarPosition::Right:
+            return ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
+                   ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+    }
+    return 0;
+}
+
+void WaylandManager::configure_layer_surface(BarPosition position, uint32_t width, uint32_t height) {
+    uint32_t anchor = calculate_anchor(position);
+    zwlr_layer_surface_v1_set_anchor(layer_surface_, anchor);
+    
+    switch (position) {
+        case BarPosition::Top:
+        case BarPosition::Bottom:
+            zwlr_layer_surface_v1_set_size(layer_surface_, 0, height);
+            break;
+        case BarPosition::Left:
+        case BarPosition::Right:
+            zwlr_layer_surface_v1_set_size(layer_surface_, width, 0);
+            break;
+    }
 }
 
 void WaylandManager::set_exclusive_zone(uint32_t size) {
