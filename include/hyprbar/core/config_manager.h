@@ -31,6 +31,10 @@ struct ConfigValue {
       : type(Type::String), string_value(s), int_value(0), double_value(0.0),
         bool_value(false) {
   }
+  explicit ConfigValue(const char* s)
+      : type(Type::String), string_value(s), int_value(0), double_value(0.0),
+        bool_value(false) {
+  }
   explicit ConfigValue(int64_t i)
       : type(Type::Integer), int_value(i), double_value(0.0),
         bool_value(false) {
