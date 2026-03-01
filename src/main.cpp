@@ -16,6 +16,7 @@ static std::unique_ptr<EventLoop> event_loop = nullptr;
 static std::unique_ptr<WaylandManager> wayland = nullptr;
 static std::unique_ptr<Renderer> renderer = nullptr;
 static wl_buffer* buffer = nullptr;
+static void* buffer_data = nullptr;  // Mapped memory for Wayland buffer
 static uint32_t bar_width = 1920;  // Will be set by layer surface configure
 
 void signal_handler(int /*sig*/) {
@@ -26,7 +27,7 @@ void signal_handler(int /*sig*/) {
 }
 
 void render_frame(const Config& config) {
-    if (!renderer || !wayland || !buffer) {
+    if (!renderer || !wayland || !buffer || !buffer_data) {
         return;
     }
 
@@ -63,6 +64,9 @@ void render_frame(const Config& config) {
                        "monospace", 14, fg_color);
 
     renderer->end_frame();
+
+    // Copy Cairo buffer to Wayland buffer
+    std::memcpy(buffer_data, renderer->get_buffer_data(), renderer->get_buffer_size());
 
     // Commit to Wayland
     wayland->attach_and_commit(buffer);
@@ -130,15 +134,11 @@ int main(int /*argc*/, char** /*argv*/) {
     }
 
     // Create Wayland buffer
-    void* buffer_data = nullptr;
     buffer = wayland->create_buffer(renderer->get_buffer_size(), &buffer_data);
-    if (!buffer) {
+    if (!buffer || !buffer_data) {
         Logger::instance().error("Failed to create Wayland buffer");
         return 1;
     }
-
-    // Copy renderer buffer to Wayland buffer initially
-    std::memcpy(buffer_data, renderer->get_buffer_data(), renderer->get_buffer_size());
 
     // Initial render
     render_frame(config);

@@ -1,6 +1,7 @@
 #include "hyprbar/wayland/wayland_manager.h"
 #include "hyprbar/core/logger.h"
 #include "hyprbar/wayland/layer_shell_protocol.h"
+#include <cairo/cairo.h>
 #include <cstring>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -212,14 +213,18 @@ wl_buffer* WaylandManager::create_buffer(size_t size, void** data) {
         return nullptr;
     }
 
+    // Get configured dimensions (set by layer_surface_configure)
+    uint32_t width = 1920;  // Default, should be updated by configure
+    uint32_t height = 30;
+    uint32_t stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+
     // Create wl_shm_pool
     wl_shm_pool* pool = wl_shm_create_pool(shm_, fd, size);
     close(fd);  // Can close fd after creating pool
 
-    // Create buffer from pool
+    // Create buffer from pool with proper dimensions
     wl_buffer* buffer = wl_shm_pool_create_buffer(pool, 0, 
-        0, 0,  // Will be set by layer shell
-        size, WL_SHM_FORMAT_ARGB8888);
+        width, height, stride, WL_SHM_FORMAT_ARGB8888);
 
     wl_shm_pool_destroy(pool);
 
@@ -227,7 +232,7 @@ wl_buffer* WaylandManager::create_buffer(size_t size, void** data) {
         *data = pool_data;
     }
 
-    Logger::instance().debug("Created wl_buffer: {} bytes", size);
+    Logger::instance().debug("Created wl_buffer: {} bytes ({}x{}, stride={})", size, width, height, stride);
     return buffer;
 }
 
