@@ -1,0 +1,9 @@
+    std::string format_{"% H:%M:%S"};
+    std::string font_{"monospace"};
+    double font_size_{14.0};
+    std::string color_{"#ffffff"};
+    std::string current_time_;
+    int cached_width_{0};
+};
+
+}  // namespace hyprbar

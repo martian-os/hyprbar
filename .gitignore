@@ -4,8 +4,8 @@ bin/
 *.o
 *.out
 
-# Executables
-hyprbar
+# Executables - root level only
+/hyprbar
 test_hyprbar
 
 # IDE
