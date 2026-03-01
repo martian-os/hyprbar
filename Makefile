@@ -87,11 +87,11 @@ clean:
 	@echo "Clean complete"
 
 # Debug build (with debug symbols, no optimization)
-debug: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -g -O0
+debug: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -g -O0 -Iinclude
 debug: clean all
 
 # Release build (optimized)
-release: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O3 -DNDEBUG
+release: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O3 -DNDEBUG -Iinclude
 release: clean all
 
 # Show help
