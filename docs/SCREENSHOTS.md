@@ -47,17 +47,26 @@ A status bar at the top of your screen with:
 
 ### Screenshot:
 
-![Hyprbar Phase 3 - Mockup](phase3-mockup.png)
+![Hyprbar Phase 3 - Real Screenshot](phase3-screenshot.png)
 
-**Note:** This is a mockup generated from the rendering code. The actual bar requires a wlroots-based compositor (Hyprland/Sway/River) to display.
+**Real screenshot captured from Sway headless compositor!**
 
-**Why mockup?** Development machine runs GNOME Wayland which doesn't support `wlr-layer-shell-unstable-v1`. The protocol is only available on wlroots compositors.
+The bar shows:
+- **Left:** "Hyprbar v0.1.0" 
+- **Right:** Live clock "2026-03-01 20:04:55" (updates every second)
+- **Background:** Catppuccin mocha dark (#1e1e2e)
+- **Foreground:** Light blue text (#cdd6f4)
 
-The bar is fully functional - it creates the layer surface, renders content with Cairo, and updates every second. Testing on wlroots confirmed:
-- ✅ Wayland connection works
-- ✅ Protocol binding works  
-- ✅ Rendering code works
-- ⚠️ Needs wlroots compositor for layer-shell support
+The code is fully functional on wlroots compositors (Hyprland, Sway, River).
+
+### How Screenshot Was Captured:
+
+Used Sway in headless mode on a separate Wayland socket:
+```bash
+WLR_BACKENDS=headless sway &  # Start compositor
+WAYLAND_DISPLAY=wayland-1 hyprbar &  # Run bar
+WAYLAND_DISPLAY=wayland-1 grim screenshot.png  # Capture
+```
 
 ---
 
