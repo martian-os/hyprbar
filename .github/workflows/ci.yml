@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang libwayland-dev make
+          sudo apt-get install -y clang libwayland-dev libcairo2-dev libpango1.0-dev make
 
       - name: Build project
         run: make
