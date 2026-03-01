@@ -88,7 +88,9 @@ public:
   /**
    * Get surface for rendering
    */
-  wl_surface *get_surface() const { return surface_; }
+  wl_surface *get_surface() const {
+    return surface_;
+  }
 
   /**
    * Create shared memory buffer
@@ -120,7 +122,9 @@ public:
   /**
    * Check if initialization was successful
    */
-  bool is_initialized() const { return display_ != nullptr; }
+  bool is_initialized() const {
+    return display_ != nullptr;
+  }
 
 private:
   void cleanup();

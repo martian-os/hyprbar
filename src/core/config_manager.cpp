@@ -16,7 +16,8 @@ public:
   }
 
 private:
-  JsonParser(const std::string &json) : json_(json), pos_(0) {}
+  JsonParser(const std::string &json) : json_(json), pos_(0) {
+  }
 
   void skip_whitespace() {
     while (pos_ < json_.size() && std::isspace(json_[pos_])) {

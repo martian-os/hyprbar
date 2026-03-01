@@ -4,7 +4,8 @@
 namespace hyprbar {
 
 WaylandSurface::WaylandSurface(WaylandManager *wayland_mgr, wl_buffer *buffer)
-    : wayland_mgr_(wayland_mgr), buffer_(buffer), buffer_data_(nullptr) {}
+    : wayland_mgr_(wayland_mgr), buffer_(buffer), buffer_data_(nullptr) {
+}
 
 bool WaylandSurface::initialize(uint32_t width, uint32_t height) {
   width_ = width;
@@ -14,9 +15,13 @@ bool WaylandSurface::initialize(uint32_t width, uint32_t height) {
   return true;
 }
 
-void *WaylandSurface::get_buffer_data() { return buffer_data_; }
+void *WaylandSurface::get_buffer_data() {
+  return buffer_data_;
+}
 
-size_t WaylandSurface::get_buffer_size() const { return width_ * height_ * 4; }
+size_t WaylandSurface::get_buffer_size() const {
+  return width_ * height_ * 4;
+}
 
 void WaylandSurface::present() {
   if (wayland_mgr_ && buffer_) {

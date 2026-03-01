@@ -14,7 +14,8 @@ struct Color {
   double r, g, b, a;
 
   Color(double r = 0, double g = 0, double b = 0, double a = 1.0)
-      : r(r), g(g), b(b), a(a) {}
+      : r(r), g(g), b(b), a(a) {
+  }
 
   // Parse from hex string (#RRGGBB or #RRGGBBAA)
   static Color from_hex(const std::string &hex);
@@ -46,27 +47,37 @@ public:
   /**
    * Get the current frame buffer data
    */
-  uint8_t *get_buffer_data() const { return buffer_data_; }
+  uint8_t *get_buffer_data() const {
+    return buffer_data_;
+  }
 
   /**
    * Get buffer size in bytes
    */
-  size_t get_buffer_size() const { return buffer_size_; }
+  size_t get_buffer_size() const {
+    return buffer_size_;
+  }
 
   /**
    * Get Cairo context for drawing
    */
-  cairo_t *get_context() const { return cr_; }
+  cairo_t *get_context() const {
+    return cr_;
+  }
 
   /**
    * Get surface width
    */
-  uint32_t get_width() const { return width_; }
+  uint32_t get_width() const {
+    return width_;
+  }
 
   /**
    * Get surface height
    */
-  uint32_t get_height() const { return height_; }
+  uint32_t get_height() const {
+    return height_;
+  }
 
   // Convenience drawing methods
   void clear(const Color &color);

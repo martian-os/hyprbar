@@ -196,6 +196,8 @@ bool EventLoop::dispatch(int timeout_ms) {
   return !shutdown_requested_;
 }
 
-void EventLoop::shutdown() { shutdown_requested_ = true; }
+void EventLoop::shutdown() {
+  shutdown_requested_ = true;
+}
 
 } // namespace hyprbar

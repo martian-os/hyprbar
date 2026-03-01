@@ -29,36 +29,64 @@ struct ConfigValue {
 
   explicit ConfigValue(const std::string &s)
       : type(Type::String), string_value(s), int_value(0), double_value(0.0),
-        bool_value(false) {}
+        bool_value(false) {
+  }
   explicit ConfigValue(int64_t i)
       : type(Type::Integer), int_value(i), double_value(0.0),
-        bool_value(false) {}
+        bool_value(false) {
+  }
   explicit ConfigValue(double d)
-      : type(Type::Double), double_value(d), int_value(0), bool_value(false) {}
+      : type(Type::Double), double_value(d), int_value(0), bool_value(false) {
+  }
   explicit ConfigValue(bool b)
-      : type(Type::Boolean), bool_value(b), int_value(0), double_value(0.0) {}
+      : type(Type::Boolean), bool_value(b), int_value(0), double_value(0.0) {
+  }
   explicit ConfigValue(const std::map<std::string, ConfigValue> &obj)
       : type(Type::Object), object_value(obj), int_value(0), double_value(0.0),
-        bool_value(false) {}
+        bool_value(false) {
+  }
   explicit ConfigValue(const std::vector<ConfigValue> &arr)
       : type(Type::Array), array_value(arr), int_value(0), double_value(0.0),
-        bool_value(false) {}
+        bool_value(false) {
+  }
 
-  bool is_string() const { return type == Type::String; }
-  bool is_int() const { return type == Type::Integer; }
-  bool is_double() const { return type == Type::Double; }
-  bool is_bool() const { return type == Type::Boolean; }
-  bool is_object() const { return type == Type::Object; }
-  bool is_array() const { return type == Type::Array; }
+  bool is_string() const {
+    return type == Type::String;
+  }
+  bool is_int() const {
+    return type == Type::Integer;
+  }
+  bool is_double() const {
+    return type == Type::Double;
+  }
+  bool is_bool() const {
+    return type == Type::Boolean;
+  }
+  bool is_object() const {
+    return type == Type::Object;
+  }
+  bool is_array() const {
+    return type == Type::Array;
+  }
 
-  std::string as_string() const { return string_value; }
-  int64_t as_int() const { return int_value; }
-  double as_double() const { return double_value; }
-  bool as_bool() const { return bool_value; }
+  std::string as_string() const {
+    return string_value;
+  }
+  int64_t as_int() const {
+    return int_value;
+  }
+  double as_double() const {
+    return double_value;
+  }
+  bool as_bool() const {
+    return bool_value;
+  }
   const std::map<std::string, ConfigValue> &as_object() const {
     return object_value;
   }
-  const std::vector<ConfigValue> &as_array() const { return array_value; }
+  const std::vector<ConfigValue> &as_array() const {
+    return array_value;
+  }
 
   std::optional<ConfigValue> get(const std::string &key) const {
     if (!is_object())
@@ -129,12 +157,16 @@ public:
   /**
    * Get parsed configuration
    */
-  const Config &get_config() const { return config_; }
+  const Config &get_config() const {
+    return config_;
+  }
 
   /**
    * Get last error message
    */
-  const std::string &get_error() const { return error_; }
+  const std::string &get_error() const {
+    return error_;
+  }
 
   /**
    * Get default config path

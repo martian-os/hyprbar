@@ -41,7 +41,8 @@ WaylandManager::WaylandManager()
     : display_(nullptr), registry_(nullptr), compositor_(nullptr),
       shm_(nullptr), seat_(nullptr), pointer_(nullptr), surface_(nullptr),
       layer_shell_(nullptr), layer_surface_(nullptr), pointer_x_(0),
-      pointer_y_(0) {}
+      pointer_y_(0) {
+}
 
 WaylandManager::~WaylandManager() {
   cleanup();
@@ -342,12 +343,14 @@ void WaylandManager::pointer_handle_enter(void * /*data*/,
                                           wl_pointer * /*pointer*/,
                                           uint32_t /*serial*/,
                                           wl_surface * /*surface*/,
-                                          wl_fixed_t /*x*/, wl_fixed_t /*y*/) {}
+                                          wl_fixed_t /*x*/, wl_fixed_t /*y*/) {
+}
 
 void WaylandManager::pointer_handle_leave(void * /*data*/,
                                           wl_pointer * /*pointer*/,
                                           uint32_t /*serial*/,
-                                          wl_surface * /*surface*/) {}
+                                          wl_surface * /*surface*/) {
+}
 
 void WaylandManager::pointer_handle_motion(void *data, wl_pointer * /*pointer*/,
                                            uint32_t /*time*/, wl_fixed_t x,
@@ -375,24 +378,29 @@ void WaylandManager::pointer_handle_button(void *data, wl_pointer * /*pointer*/,
 void WaylandManager::pointer_handle_axis(void * /*data*/,
                                          wl_pointer * /*pointer*/,
                                          uint32_t /*time*/, uint32_t /*axis*/,
-                                         wl_fixed_t /*value*/) {}
+                                         wl_fixed_t /*value*/) {
+}
 
 void WaylandManager::pointer_handle_frame(void * /*data*/,
-                                          wl_pointer * /*pointer*/) {}
+                                          wl_pointer * /*pointer*/) {
+}
 
 void WaylandManager::pointer_handle_axis_source(void * /*data*/,
                                                 wl_pointer * /*pointer*/,
-                                                uint32_t /*source*/) {}
+                                                uint32_t /*source*/) {
+}
 
 void WaylandManager::pointer_handle_axis_stop(void * /*data*/,
                                               wl_pointer * /*pointer*/,
                                               uint32_t /*time*/,
-                                              uint32_t /*axis*/) {}
+                                              uint32_t /*axis*/) {
+}
 
 void WaylandManager::pointer_handle_axis_discrete(void * /*data*/,
                                                   wl_pointer * /*pointer*/,
                                                   uint32_t /*axis*/,
-                                                  int32_t /*discrete*/) {}
+                                                  int32_t /*discrete*/) {
+}
 
 // Layer surface callbacks
 void WaylandManager::layer_surface_handle_configure(

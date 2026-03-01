@@ -20,8 +20,12 @@ public:
   void *get_buffer_data() override;
   size_t get_buffer_size() const override;
   void present() override;
-  uint32_t get_width() const override { return width_; }
-  uint32_t get_height() const override { return height_; }
+  uint32_t get_width() const override {
+    return width_;
+  }
+  uint32_t get_height() const override {
+    return height_;
+  }
   bool process_events() override;
 
 private:

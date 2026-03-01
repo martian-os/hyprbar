@@ -91,7 +91,9 @@ public:
   /**
    * Check if shutdown has been requested
    */
-  bool is_shutdown_requested() const { return shutdown_requested_; }
+  bool is_shutdown_requested() const {
+    return shutdown_requested_;
+  }
 
 private:
   struct Timer {

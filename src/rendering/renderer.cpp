@@ -39,7 +39,8 @@ Color Color::from_hex(const std::string &hex) {
 
 Renderer::Renderer()
     : width_(0), height_(0), stride_(0), buffer_data_(nullptr), buffer_size_(0),
-      surface_(nullptr), cr_(nullptr) {}
+      surface_(nullptr), cr_(nullptr) {
+}
 
 Renderer::~Renderer() {
   if (cr_) {
@@ -91,7 +92,9 @@ void Renderer::begin_frame() {
   cairo_restore(cr_);
 }
 
-void Renderer::end_frame() { cairo_surface_flush(surface_); }
+void Renderer::end_frame() {
+  cairo_surface_flush(surface_);
+}
 
 void Renderer::clear(const Color &color) {
   cairo_save(cr_);

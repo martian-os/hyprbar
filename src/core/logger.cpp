@@ -7,14 +7,17 @@ namespace hyprbar {
 static std::mutex log_mutex;
 
 Logger::Logger()
-    : min_level_(Level::Info), output_(&std::cerr), colored_(true) {}
+    : min_level_(Level::Info), output_(&std::cerr), colored_(true) {
+}
 
 Logger &Logger::instance() {
   static Logger instance;
   return instance;
 }
 
-void Logger::set_level(Level level) { min_level_ = level; }
+void Logger::set_level(Level level) {
+  min_level_ = level;
+}
 
 std::string Logger::level_string(Level level) const {
   switch (level) {

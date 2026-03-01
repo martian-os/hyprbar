@@ -33,7 +33,9 @@ public:
   /**
    * Get current minimum log level
    */
-  Level get_level() const { return min_level_; }
+  Level get_level() const {
+    return min_level_;
+  }
 
   /**
    * Log a message with specified level
@@ -43,10 +45,18 @@ public:
   /**
    * Convenience methods for specific levels
    */
-  void debug(const std::string &message) { log(Level::Debug, message); }
-  void info(const std::string &message) { log(Level::Info, message); }
-  void warn(const std::string &message) { log(Level::Warn, message); }
-  void error(const std::string &message) { log(Level::Error, message); }
+  void debug(const std::string &message) {
+    log(Level::Debug, message);
+  }
+  void info(const std::string &message) {
+    log(Level::Info, message);
+  }
+  void warn(const std::string &message) {
+    log(Level::Warn, message);
+  }
+  void error(const std::string &message) {
+    log(Level::Error, message);
+  }
 
   /**
    * Template methods for formatted logging
@@ -74,12 +84,16 @@ public:
   /**
    * Set output stream (default: stderr)
    */
-  void set_output(std::ostream *output) { output_ = output; }
+  void set_output(std::ostream *output) {
+    output_ = output;
+  }
 
   /**
    * Enable/disable colored output (ANSI codes)
    */
-  void set_colored(bool colored) { colored_ = colored; }
+  void set_colored(bool colored) {
+    colored_ = colored;
+  }
 
 private:
   Logger();
