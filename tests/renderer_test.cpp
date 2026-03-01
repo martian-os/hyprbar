@@ -1,5 +1,5 @@
-#include "test_utils.h"
 #include "hyprbar/rendering/renderer.h"
+#include "test_utils.h"
 #include <cstring>
 
 using namespace hyprbar;

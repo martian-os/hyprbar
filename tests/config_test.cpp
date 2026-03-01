@@ -1,5 +1,5 @@
-#include "test_utils.h"
 #include "hyprbar/core/config_manager.h"
+#include "test_utils.h"
 #include <fstream>
 
 using namespace hyprbar;
@@ -51,8 +51,7 @@ void test_config_value_object() {
   test::assert(val.object_value.size() == 2, "Object size");
   test::assert(val.object_value["name"].string_value == "hyprbar",
                "Object string field");
-  test::assert(val.object_value["version"].int_value == 1,
-               "Object int field");
+  test::assert(val.object_value["version"].int_value == 1, "Object int field");
 }
 
 void test_parse_simple_json() {

@@ -1,6 +1,6 @@
-#include "test_utils.h"
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/widgets/clock_widget.h"
+#include "test_utils.h"
 
 using namespace hyprbar;
 
@@ -34,7 +34,7 @@ void test_clock_update() {
 
   // First update should always return true (initial render)
   bool changed = widget.update();
-  
+
   // If same second, update again (returns false)
   // If different second, changed is true
   // Either way, widget update mechanism works
