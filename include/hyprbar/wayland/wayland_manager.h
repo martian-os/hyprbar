@@ -29,8 +29,8 @@ public:
   ~WaylandManager();
 
   // Non-copyable
-  WaylandManager(const WaylandManager &) = delete;
-  WaylandManager &operator=(const WaylandManager &) = delete;
+  WaylandManager(const WaylandManager&) = delete;
+  WaylandManager& operator=(const WaylandManager&) = delete;
 
   /**
    * Initialize Wayland connection
@@ -88,7 +88,7 @@ public:
   /**
    * Get surface for rendering
    */
-  wl_surface *get_surface() const {
+  wl_surface* get_surface() const {
     return surface_;
   }
 
@@ -97,13 +97,13 @@ public:
    * @param size Buffer size in bytes
    * @return wl_buffer or nullptr on failure
    */
-  wl_buffer *create_buffer(size_t size, void **data);
+  wl_buffer* create_buffer(size_t size, void** data);
 
   /**
    * Attach buffer and commit surface
    * @param buffer Buffer to attach
    */
-  void attach_and_commit(wl_buffer *buffer);
+  void attach_and_commit(wl_buffer* buffer);
 
   /**
    * Set pointer button callback
@@ -132,17 +132,17 @@ private:
   void configure_layer_surface(BarPosition position, uint32_t width,
                                uint32_t height);
   // Wayland objects
-  wl_display *display_;
-  wl_registry *registry_;
-  wl_compositor *compositor_;
-  wl_shm *shm_;
-  wl_seat *seat_;
-  wl_pointer *pointer_;
-  wl_surface *surface_;
+  wl_display* display_;
+  wl_registry* registry_;
+  wl_compositor* compositor_;
+  wl_shm* shm_;
+  wl_seat* seat_;
+  wl_pointer* pointer_;
+  wl_surface* surface_;
 
   // Layer shell objects
-  zwlr_layer_shell_v1 *layer_shell_;
-  zwlr_layer_surface_v1 *layer_surface_;
+  zwlr_layer_shell_v1* layer_shell_;
+  zwlr_layer_surface_v1* layer_surface_;
 
   // Callbacks
   PointerButtonCallback pointer_button_callback_;
@@ -154,43 +154,43 @@ private:
 
 public:
   // Static callback handlers (must be public for C linkage)
-  static void registry_handle_global(void *data, wl_registry *registry,
-                                     uint32_t name, const char *interface,
+  static void registry_handle_global(void* data, wl_registry* registry,
+                                     uint32_t name, const char* interface,
                                      uint32_t version);
-  static void registry_handle_global_remove(void *data, wl_registry *registry,
+  static void registry_handle_global_remove(void* data, wl_registry* registry,
                                             uint32_t name);
 
-  static void pointer_handle_enter(void *data, wl_pointer *pointer,
-                                   uint32_t serial, wl_surface *surface,
+  static void pointer_handle_enter(void* data, wl_pointer* pointer,
+                                   uint32_t serial, wl_surface* surface,
                                    wl_fixed_t x, wl_fixed_t y);
-  static void pointer_handle_leave(void *data, wl_pointer *pointer,
-                                   uint32_t serial, wl_surface *surface);
-  static void pointer_handle_motion(void *data, wl_pointer *pointer,
+  static void pointer_handle_leave(void* data, wl_pointer* pointer,
+                                   uint32_t serial, wl_surface* surface);
+  static void pointer_handle_motion(void* data, wl_pointer* pointer,
                                     uint32_t time, wl_fixed_t x, wl_fixed_t y);
-  static void pointer_handle_button(void *data, wl_pointer *pointer,
+  static void pointer_handle_button(void* data, wl_pointer* pointer,
                                     uint32_t serial, uint32_t time,
                                     uint32_t button, uint32_t state);
-  static void pointer_handle_axis(void *data, wl_pointer *pointer,
+  static void pointer_handle_axis(void* data, wl_pointer* pointer,
                                   uint32_t time, uint32_t axis,
                                   wl_fixed_t value);
-  static void pointer_handle_frame(void *data, wl_pointer *pointer);
-  static void pointer_handle_axis_source(void *data, wl_pointer *pointer,
+  static void pointer_handle_frame(void* data, wl_pointer* pointer);
+  static void pointer_handle_axis_source(void* data, wl_pointer* pointer,
                                          uint32_t source);
-  static void pointer_handle_axis_stop(void *data, wl_pointer *pointer,
+  static void pointer_handle_axis_stop(void* data, wl_pointer* pointer,
                                        uint32_t time, uint32_t axis);
-  static void pointer_handle_axis_discrete(void *data, wl_pointer *pointer,
+  static void pointer_handle_axis_discrete(void* data, wl_pointer* pointer,
                                            uint32_t axis, int32_t discrete);
 
-  static void seat_handle_capabilities(void *data, wl_seat *seat,
+  static void seat_handle_capabilities(void* data, wl_seat* seat,
                                        uint32_t capabilities);
-  static void seat_handle_name(void *data, wl_seat *seat, const char *name);
+  static void seat_handle_name(void* data, wl_seat* seat, const char* name);
 
-  static void layer_surface_handle_configure(void *data,
-                                             zwlr_layer_surface_v1 *surface,
+  static void layer_surface_handle_configure(void* data,
+                                             zwlr_layer_surface_v1* surface,
                                              uint32_t serial, uint32_t width,
                                              uint32_t height);
-  static void layer_surface_handle_closed(void *data,
-                                          zwlr_layer_surface_v1 *surface);
+  static void layer_surface_handle_closed(void* data,
+                                          zwlr_layer_surface_v1* surface);
 };
 
 } // namespace hyprbar

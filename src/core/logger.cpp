@@ -10,7 +10,7 @@ Logger::Logger()
     : min_level_(Level::Info), output_(&std::cerr), colored_(true) {
 }
 
-Logger &Logger::instance() {
+Logger& Logger::instance() {
   static Logger instance;
   return instance;
 }
@@ -69,7 +69,7 @@ std::string Logger::timestamp() const {
   return oss.str();
 }
 
-void Logger::log(Level level, const std::string &message) {
+void Logger::log(Level level, const std::string& message) {
   if (level < min_level_) {
     return;
   }

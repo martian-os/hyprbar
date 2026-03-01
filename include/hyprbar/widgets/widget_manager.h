@@ -30,7 +30,7 @@ public:
    * @param config_mgr Configuration manager
    * @return true on success
    */
-  bool initialize(const ConfigManager &config_mgr);
+  bool initialize(const ConfigManager& config_mgr);
 
   /**
    * Update all widgets
@@ -44,7 +44,7 @@ public:
    * @param bar_width Total bar width
    * @param bar_height Total bar height
    */
-  void render(Renderer &renderer, int bar_width, int bar_height);
+  void render(Renderer& renderer, int bar_width, int bar_height);
 
   /**
    * Handle pointer click
@@ -55,7 +55,7 @@ public:
   void on_click(int x, int y, uint32_t button);
 
 private:
-  std::unique_ptr<Widget> create_widget(const std::string &type);
+  std::unique_ptr<Widget> create_widget(const std::string& type);
 
   struct WidgetSlot {
     std::unique_ptr<Widget> widget;

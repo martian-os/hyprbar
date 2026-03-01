@@ -4,7 +4,7 @@
 
 namespace hyprbar {
 
-FileSurface::FileSurface(const std::string &output_path)
+FileSurface::FileSurface(const std::string& output_path)
     : output_path_(output_path) {
 }
 
@@ -39,7 +39,7 @@ bool FileSurface::initialize(uint32_t width, uint32_t height) {
   return true;
 }
 
-void *FileSurface::get_buffer_data() {
+void* FileSurface::get_buffer_data() {
   return buffer_data_;
 }
 

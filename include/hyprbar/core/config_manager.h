@@ -27,7 +27,7 @@ struct ConfigValue {
       : type(Type::String), int_value(0), double_value(0.0), bool_value(false) {
   }
 
-  explicit ConfigValue(const std::string &s)
+  explicit ConfigValue(const std::string& s)
       : type(Type::String), string_value(s), int_value(0), double_value(0.0),
         bool_value(false) {
   }
@@ -41,11 +41,11 @@ struct ConfigValue {
   explicit ConfigValue(bool b)
       : type(Type::Boolean), bool_value(b), int_value(0), double_value(0.0) {
   }
-  explicit ConfigValue(const std::map<std::string, ConfigValue> &obj)
+  explicit ConfigValue(const std::map<std::string, ConfigValue>& obj)
       : type(Type::Object), object_value(obj), int_value(0), double_value(0.0),
         bool_value(false) {
   }
-  explicit ConfigValue(const std::vector<ConfigValue> &arr)
+  explicit ConfigValue(const std::vector<ConfigValue>& arr)
       : type(Type::Array), array_value(arr), int_value(0), double_value(0.0),
         bool_value(false) {
   }
@@ -81,14 +81,14 @@ struct ConfigValue {
   bool as_bool() const {
     return bool_value;
   }
-  const std::map<std::string, ConfigValue> &as_object() const {
+  const std::map<std::string, ConfigValue>& as_object() const {
     return object_value;
   }
-  const std::vector<ConfigValue> &as_array() const {
+  const std::vector<ConfigValue>& as_array() const {
     return array_value;
   }
 
-  std::optional<ConfigValue> get(const std::string &key) const {
+  std::optional<ConfigValue> get(const std::string& key) const {
     if (!is_object())
       return std::nullopt;
     auto it = object_value.find(key);
@@ -145,26 +145,26 @@ public:
    * @param path Path to config file (JSON)
    * @return true on success
    */
-  bool load(const std::string &path);
+  bool load(const std::string& path);
 
   /**
    * Load configuration from string
    * @param json JSON string
    * @return true on success
    */
-  bool load_from_string(const std::string &json);
+  bool load_from_string(const std::string& json);
 
   /**
    * Get parsed configuration
    */
-  const Config &get_config() const {
+  const Config& get_config() const {
     return config_;
   }
 
   /**
    * Get last error message
    */
-  const std::string &get_error() const {
+  const std::string& get_error() const {
     return error_;
   }
 
@@ -174,12 +174,12 @@ public:
   static std::string get_default_config_path();
 
 private:
-  bool parse_json(const std::string &json);
-  bool parse_bar_config(const ConfigValue &value);
-  bool parse_widgets(const ConfigValue &value);
+  bool parse_json(const std::string& json);
+  bool parse_bar_config(const ConfigValue& value);
+  bool parse_widgets(const ConfigValue& value);
 
-  BarConfig::Position parse_position(const std::string &pos);
-  WidgetConfig::Position parse_widget_position(const std::string &pos);
+  BarConfig::Position parse_position(const std::string& pos);
+  WidgetConfig::Position parse_widget_position(const std::string& pos);
 
   Config config_;
   std::string error_;

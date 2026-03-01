@@ -7,7 +7,7 @@
 
 namespace hyprbar {
 
-Color Color::from_hex(const std::string &hex) {
+Color Color::from_hex(const std::string& hex) {
   std::string h = hex;
   if (h[0] == '#') {
     h = h.substr(1);
@@ -96,7 +96,7 @@ void Renderer::end_frame() {
   cairo_surface_flush(surface_);
 }
 
-void Renderer::clear(const Color &color) {
+void Renderer::clear(const Color& color) {
   cairo_save(cr_);
   cairo_set_source_rgba(cr_, color.r, color.g, color.b, color.a);
   cairo_set_operator(cr_, CAIRO_OPERATOR_SOURCE);
@@ -105,7 +105,7 @@ void Renderer::clear(const Color &color) {
 }
 
 void Renderer::fill_rect(double x, double y, double w, double h,
-                         const Color &color) {
+                         const Color& color) {
   cairo_save(cr_);
   cairo_set_source_rgba(cr_, color.r, color.g, color.b, color.a);
   cairo_rectangle(cr_, x, y, w, h);
@@ -113,9 +113,9 @@ void Renderer::fill_rect(double x, double y, double w, double h,
   cairo_restore(cr_);
 }
 
-void Renderer::draw_text(const std::string &text, double x, double y,
-                         const std::string &font, double size,
-                         const Color &color) {
+void Renderer::draw_text(const std::string& text, double x, double y,
+                         const std::string& font, double size,
+                         const Color& color) {
   if (text.empty()) {
     Logger::instance().warn("Empty text at ({}, {})", x, y);
     return;

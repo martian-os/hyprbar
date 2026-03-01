@@ -1,5 +1,14 @@
 ---
+Language: Cpp
 BasedOnStyle: LLVM
 IndentWidth: 2
 ColumnLimit: 80
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
 AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Attach
+PointerAlignment: Left

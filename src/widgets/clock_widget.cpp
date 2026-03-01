@@ -6,13 +6,13 @@
 
 namespace hyprbar {
 
-bool ClockWidget::initialize(const ConfigValue &config) {
+bool ClockWidget::initialize(const ConfigValue& config) {
   if (config.type != ConfigValue::Type::Object) {
     Logger::instance().warn("Clock widget got non-object config");
     return true; // Use defaults
   }
 
-  const auto &obj = config.object_value;
+  const auto& obj = config.object_value;
 
   if (obj.count("format")) {
     format_ = obj.at("format").string_value;
@@ -23,7 +23,7 @@ bool ClockWidget::initialize(const ConfigValue &config) {
   }
 
   if (obj.count("size")) {
-    const auto &size_val = obj.at("size");
+    const auto& size_val = obj.at("size");
     if (size_val.type == ConfigValue::Type::Integer) {
       font_size_ = static_cast<double>(size_val.int_value);
     } else if (size_val.type == ConfigValue::Type::Double) {
@@ -45,7 +45,7 @@ bool ClockWidget::initialize(const ConfigValue &config) {
 
 std::string ClockWidget::format_time() const {
   time_t now = time(nullptr);
-  struct tm *tm_info = localtime(&now);
+  struct tm* tm_info = localtime(&now);
   char buffer[128];
   strftime(buffer, sizeof(buffer), format_.c_str(), tm_info);
   return std::string(buffer);
@@ -60,7 +60,7 @@ bool ClockWidget::update() {
   return false;
 }
 
-void ClockWidget::render(Renderer &renderer, int x, int y, int /*width*/,
+void ClockWidget::render(Renderer& renderer, int x, int y, int /*width*/,
                          int height) {
   Color fg = Color::from_hex(color_);
   double text_y = y + (height / 2.0) + (font_size_ / 3.0);

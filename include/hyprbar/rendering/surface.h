@@ -27,7 +27,7 @@ public:
    * Get buffer data for rendering
    * @return Pointer to buffer data
    */
-  virtual void *get_buffer_data() = 0;
+  virtual void* get_buffer_data() = 0;
 
   /**
    * Get buffer size in bytes

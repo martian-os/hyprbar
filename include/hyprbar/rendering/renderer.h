@@ -18,7 +18,7 @@ struct Color {
   }
 
   // Parse from hex string (#RRGGBB or #RRGGBBAA)
-  static Color from_hex(const std::string &hex);
+  static Color from_hex(const std::string& hex);
 };
 
 /**
@@ -47,7 +47,7 @@ public:
   /**
    * Get the current frame buffer data
    */
-  uint8_t *get_buffer_data() const {
+  uint8_t* get_buffer_data() const {
     return buffer_data_;
   }
 
@@ -61,7 +61,7 @@ public:
   /**
    * Get Cairo context for drawing
    */
-  cairo_t *get_context() const {
+  cairo_t* get_context() const {
     return cr_;
   }
 
@@ -80,21 +80,21 @@ public:
   }
 
   // Convenience drawing methods
-  void clear(const Color &color);
-  void fill_rect(double x, double y, double w, double h, const Color &color);
-  void draw_text(const std::string &text, double x, double y,
-                 const std::string &font, double size, const Color &color);
+  void clear(const Color& color);
+  void fill_rect(double x, double y, double w, double h, const Color& color);
+  void draw_text(const std::string& text, double x, double y,
+                 const std::string& font, double size, const Color& color);
 
 private:
   uint32_t width_;
   uint32_t height_;
   uint32_t stride_;
 
-  uint8_t *buffer_data_;
+  uint8_t* buffer_data_;
   size_t buffer_size_;
 
-  cairo_surface_t *surface_;
-  cairo_t *cr_;
+  cairo_surface_t* surface_;
+  cairo_t* cr_;
 };
 
 } // namespace hyprbar

@@ -8,13 +8,13 @@
 
 namespace hyprbar {
 
-bool ScriptWidget::initialize(const ConfigValue &config) {
+bool ScriptWidget::initialize(const ConfigValue& config) {
   if (config.type != ConfigValue::Type::Object) {
     Logger::instance().error("Script widget requires configuration object");
     return false;
   }
 
-  const auto &obj = config.object_value;
+  const auto& obj = config.object_value;
 
   if (!obj.count("command")) {
     Logger::instance().error("Script widget requires 'command' parameter");
@@ -24,7 +24,7 @@ bool ScriptWidget::initialize(const ConfigValue &config) {
   command_ = obj.at("command").string_value;
 
   if (obj.count("interval")) {
-    const auto &interval_val = obj.at("interval");
+    const auto& interval_val = obj.at("interval");
     if (interval_val.type == ConfigValue::Type::Integer) {
       interval_ms_ = static_cast<int>(interval_val.int_value);
     } else if (interval_val.type == ConfigValue::Type::Double) {
@@ -37,7 +37,7 @@ bool ScriptWidget::initialize(const ConfigValue &config) {
   }
 
   if (obj.count("size")) {
-    const auto &size_val = obj.at("size");
+    const auto& size_val = obj.at("size");
     if (size_val.type == ConfigValue::Type::Integer) {
       font_size_ = static_cast<double>(size_val.int_value);
     } else if (size_val.type == ConfigValue::Type::Double) {
@@ -101,7 +101,7 @@ bool ScriptWidget::update() {
   return false;
 }
 
-void ScriptWidget::render(Renderer &renderer, int x, int y, int /*width*/,
+void ScriptWidget::render(Renderer& renderer, int x, int y, int /*width*/,
                           int height) {
   Color fg = Color::from_hex(color_);
   double text_y = y + (height / 2.0) + (font_size_ / 3.0);

@@ -7,7 +7,7 @@
 
 namespace hyprbar {
 
-std::unique_ptr<Widget> WidgetManager::create_widget(const std::string &type) {
+std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
   if (type == "clock") {
     return std::make_unique<ClockWidget>();
   }
@@ -20,10 +20,10 @@ std::unique_ptr<Widget> WidgetManager::create_widget(const std::string &type) {
   return nullptr;
 }
 
-bool WidgetManager::initialize(const ConfigManager &config_mgr) {
-  const auto &config = config_mgr.get_config();
+bool WidgetManager::initialize(const ConfigManager& config_mgr) {
+  const auto& config = config_mgr.get_config();
 
-  for (const auto &widget_config : config.widgets) {
+  for (const auto& widget_config : config.widgets) {
     auto widget = create_widget(widget_config.type);
     if (!widget) {
       continue;
@@ -49,7 +49,7 @@ bool WidgetManager::initialize(const ConfigManager &config_mgr) {
 
 bool WidgetManager::update() {
   bool needs_redraw = false;
-  for (auto &slot : widgets_) {
+  for (auto& slot : widgets_) {
     if (slot.widget->update()) {
       needs_redraw = true;
     }
@@ -57,7 +57,7 @@ bool WidgetManager::update() {
   return needs_redraw;
 }
 
-void WidgetManager::render(Renderer &renderer, int bar_width, int bar_height) {
+void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
   if (widgets_.empty()) {
     Logger::instance().warn("No widgets to render");
     return;
@@ -69,7 +69,7 @@ void WidgetManager::render(Renderer &renderer, int bar_width, int bar_height) {
   int x = 10;
   const int spacing = 10;
 
-  for (auto &slot : widgets_) {
+  for (auto& slot : widgets_) {
     int widget_width = slot.widget->get_desired_width();
     int widget_height = slot.widget->get_desired_height();
 
@@ -93,7 +93,7 @@ void WidgetManager::render(Renderer &renderer, int bar_width, int bar_height) {
 }
 
 void WidgetManager::on_click(int x, int y, uint32_t button) {
-  for (auto &slot : widgets_) {
+  for (auto& slot : widgets_) {
     if (x >= slot.x && x < slot.x + slot.width && y >= slot.y &&
         y < slot.y + slot.height) {
       int local_x = x - slot.x;

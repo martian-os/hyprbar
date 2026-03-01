@@ -34,8 +34,8 @@ public:
   ~EventLoop();
 
   // Non-copyable
-  EventLoop(const EventLoop &) = delete;
-  EventLoop &operator=(const EventLoop &) = delete;
+  EventLoop(const EventLoop&) = delete;
+  EventLoop& operator=(const EventLoop&) = delete;
 
   /**
    * Add a file descriptor to monitor
@@ -112,7 +112,7 @@ private:
   };
 
   void process_timers();
-  void handle_expired_timer(Timer &timer, TimePoint now);
+  void handle_expired_timer(Timer& timer, TimePoint now);
   void remove_cancelled_timers();
   int get_next_timer_timeout() const;
 

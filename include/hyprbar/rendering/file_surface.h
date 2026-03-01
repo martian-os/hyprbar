@@ -15,11 +15,11 @@ namespace hyprbar {
  */
 class FileSurface : public Surface {
 public:
-  FileSurface(const std::string &output_path);
+  FileSurface(const std::string& output_path);
   ~FileSurface() override;
 
   bool initialize(uint32_t width, uint32_t height) override;
-  void *get_buffer_data() override;
+  void* get_buffer_data() override;
   size_t get_buffer_size() const override;
   void present() override;
   uint32_t get_width() const override {
@@ -34,8 +34,8 @@ private:
   std::string output_path_;
   uint32_t width_{0};
   uint32_t height_{0};
-  cairo_surface_t *surface_{nullptr};
-  uint8_t *buffer_data_{nullptr};
+  cairo_surface_t* surface_{nullptr};
+  uint8_t* buffer_data_{nullptr};
   bool presented_{false};
 };
 

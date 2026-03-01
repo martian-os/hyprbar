@@ -28,7 +28,7 @@ public:
    * @param config Widget-specific configuration
    * @return true on success
    */
-  virtual bool initialize(const ConfigValue &config) = 0;
+  virtual bool initialize(const ConfigValue& config) = 0;
 
   /**
    * Update widget state (called periodically)
@@ -44,7 +44,7 @@ public:
    * @param width Available width
    * @param height Available height
    */
-  virtual void render(Renderer &renderer, int x, int y, int width,
+  virtual void render(Renderer& renderer, int x, int y, int width,
                       int height) = 0;
 
   /**

@@ -19,11 +19,11 @@ class Logger {
 public:
   enum class Level { Debug = 0, Info = 1, Warn = 2, Error = 3 };
 
-  static Logger &instance();
+  static Logger& instance();
 
   // Non-copyable, non-movable
-  Logger(const Logger &) = delete;
-  Logger &operator=(const Logger &) = delete;
+  Logger(const Logger&) = delete;
+  Logger& operator=(const Logger&) = delete;
 
   /**
    * Set minimum log level (messages below this are ignored)
@@ -40,21 +40,21 @@ public:
   /**
    * Log a message with specified level
    */
-  void log(Level level, const std::string &message);
+  void log(Level level, const std::string& message);
 
   /**
    * Convenience methods for specific levels
    */
-  void debug(const std::string &message) {
+  void debug(const std::string& message) {
     log(Level::Debug, message);
   }
-  void info(const std::string &message) {
+  void info(const std::string& message) {
     log(Level::Info, message);
   }
-  void warn(const std::string &message) {
+  void warn(const std::string& message) {
     log(Level::Warn, message);
   }
-  void error(const std::string &message) {
+  void error(const std::string& message) {
     log(Level::Error, message);
   }
 
@@ -62,29 +62,29 @@ public:
    * Template methods for formatted logging
    */
   template <typename... Args>
-  void debug(const std::string &format, Args &&...args) {
+  void debug(const std::string& format, Args&&... args) {
     log(Level::Debug, format_string(format, std::forward<Args>(args)...));
   }
 
   template <typename... Args>
-  void info(const std::string &format, Args &&...args) {
+  void info(const std::string& format, Args&&... args) {
     log(Level::Info, format_string(format, std::forward<Args>(args)...));
   }
 
   template <typename... Args>
-  void warn(const std::string &format, Args &&...args) {
+  void warn(const std::string& format, Args&&... args) {
     log(Level::Warn, format_string(format, std::forward<Args>(args)...));
   }
 
   template <typename... Args>
-  void error(const std::string &format, Args &&...args) {
+  void error(const std::string& format, Args&&... args) {
     log(Level::Error, format_string(format, std::forward<Args>(args)...));
   }
 
   /**
    * Set output stream (default: stderr)
    */
-  void set_output(std::ostream *output) {
+  void set_output(std::ostream* output) {
     output_ = output;
   }
 
@@ -103,14 +103,14 @@ private:
   std::string level_color(Level level) const;
   std::string timestamp() const;
 
-  template <typename T> std::string to_string(T &&value) {
+  template <typename T> std::string to_string(T&& value) {
     std::ostringstream oss;
     oss << std::forward<T>(value);
     return oss.str();
   }
 
   template <typename... Args>
-  std::string format_string(const std::string &format, Args &&...args) {
+  std::string format_string(const std::string& format, Args&&... args) {
     std::string result = format;
     std::string values[] = {to_string(std::forward<Args>(args))...};
     size_t index = 0;
@@ -128,7 +128,7 @@ private:
   }
 
   Level min_level_;
-  std::ostream *output_;
+  std::ostream* output_;
   bool colored_;
 };
 

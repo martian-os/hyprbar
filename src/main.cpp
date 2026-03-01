@@ -31,7 +31,7 @@ void signal_handler(int /*sig*/) {
   }
 }
 
-void render_frame(void *wayland_buffer) {
+void render_frame(void* wayland_buffer) {
   if (!app.renderer) {
     return;
   }
@@ -55,7 +55,7 @@ void render_frame(void *wayland_buffer) {
   }
 }
 
-int run_screenshot_mode(const std::string &output_path, const Config &config) {
+int run_screenshot_mode(const std::string& output_path, const Config& config) {
   Logger::instance().info("Screenshot mode: {}", output_path);
 
   // Initialize renderer
@@ -83,7 +83,7 @@ int run_screenshot_mode(const std::string &output_path, const Config &config) {
   return 0;
 }
 
-int run_wayland_mode(const Config &config) {
+int run_wayland_mode(const Config& config) {
   Logger::instance().info("Wayland mode starting...");
 
   app.wayland = std::make_unique<WaylandManager>();
@@ -123,8 +123,8 @@ int run_wayland_mode(const Config &config) {
   }
 
   // Create Wayland buffer
-  void *buffer_data = nullptr;
-  wl_buffer *buffer =
+  void* buffer_data = nullptr;
+  wl_buffer* buffer =
       app.wayland->create_buffer(app.renderer->get_buffer_size(), &buffer_data);
   if (!buffer || !buffer_data) {
     Logger::instance().error("Failed to create Wayland buffer");
@@ -174,7 +174,7 @@ int run_wayland_mode(const Config &config) {
   return 0;
 }
 
-void print_usage(const char *program) {
+void print_usage(const char* program) {
   std::cout << "Usage: " << program << " [OPTIONS]\n\n"
             << "Options:\n"
             << "  --screenshot <path>   Generate screenshot to file (no "
@@ -183,7 +183,7 @@ void print_usage(const char *program) {
             << "Without options, runs in normal Wayland mode.\n";
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   signal(SIGINT, signal_handler);
   signal(SIGTERM, signal_handler);
 

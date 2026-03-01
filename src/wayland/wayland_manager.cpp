@@ -226,7 +226,7 @@ int WaylandManager::dispatch_pending() {
   return display_ ? wl_display_dispatch_pending(display_) : -1;
 }
 
-wl_buffer *WaylandManager::create_buffer(size_t size, void **data) {
+wl_buffer* WaylandManager::create_buffer(size_t size, void** data) {
   // Create anonymous file
   int fd = memfd_create("hyprbar-buffer", MFD_CLOEXEC);
   if (fd < 0) {
@@ -242,7 +242,7 @@ wl_buffer *WaylandManager::create_buffer(size_t size, void **data) {
   }
 
   // Map memory
-  void *pool_data =
+  void* pool_data =
       mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   if (pool_data == MAP_FAILED) {
     Logger::instance().error("Failed to mmap buffer: {}", strerror(errno));
@@ -256,11 +256,11 @@ wl_buffer *WaylandManager::create_buffer(size_t size, void **data) {
   uint32_t stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
 
   // Create wl_shm_pool
-  wl_shm_pool *pool = wl_shm_create_pool(shm_, fd, size);
+  wl_shm_pool* pool = wl_shm_create_pool(shm_, fd, size);
   close(fd); // Can close fd after creating pool
 
   // Create buffer from pool with proper dimensions
-  wl_buffer *buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride,
+  wl_buffer* buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride,
                                                 WL_SHM_FORMAT_ARGB8888);
 
   wl_shm_pool_destroy(pool);
@@ -274,7 +274,7 @@ wl_buffer *WaylandManager::create_buffer(size_t size, void **data) {
   return buffer;
 }
 
-void WaylandManager::attach_and_commit(wl_buffer *buffer) {
+void WaylandManager::attach_and_commit(wl_buffer* buffer) {
   wl_surface_attach(surface_, buffer, 0, 0);
   wl_surface_damage_buffer(surface_, 0, 0, INT32_MAX, INT32_MAX);
   wl_surface_commit(surface_);
@@ -282,42 +282,42 @@ void WaylandManager::attach_and_commit(wl_buffer *buffer) {
 }
 
 // Registry callbacks
-void WaylandManager::registry_handle_global(void *data, wl_registry *registry,
+void WaylandManager::registry_handle_global(void* data, wl_registry* registry,
                                             uint32_t name,
-                                            const char *interface,
+                                            const char* interface,
                                             uint32_t version) {
-  auto *wm = static_cast<WaylandManager *>(data);
+  auto* wm = static_cast<WaylandManager*>(data);
 
   if (strcmp(interface, wl_compositor_interface.name) == 0) {
-    wm->compositor_ = static_cast<wl_compositor *>(
+    wm->compositor_ = static_cast<wl_compositor*>(
         wl_registry_bind(registry, name, &wl_compositor_interface, 4));
     Logger::instance().debug("Bound compositor");
   } else if (strcmp(interface, wl_shm_interface.name) == 0) {
-    wm->shm_ = static_cast<wl_shm *>(
+    wm->shm_ = static_cast<wl_shm*>(
         wl_registry_bind(registry, name, &wl_shm_interface, 1));
     Logger::instance().debug("Bound shm");
   } else if (strcmp(interface, wl_seat_interface.name) == 0) {
-    wm->seat_ = static_cast<wl_seat *>(
+    wm->seat_ = static_cast<wl_seat*>(
         wl_registry_bind(registry, name, &wl_seat_interface, 5));
     wl_seat_add_listener(wm->seat_, &seat_listener, wm);
     Logger::instance().debug("Bound seat");
   } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
-    wm->layer_shell_ = static_cast<zwlr_layer_shell_v1 *>(
+    wm->layer_shell_ = static_cast<zwlr_layer_shell_v1*>(
         wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1));
     Logger::instance().debug("Bound layer shell");
   }
 }
 
-void WaylandManager::registry_handle_global_remove(void * /*data*/,
-                                                   wl_registry * /*registry*/,
+void WaylandManager::registry_handle_global_remove(void* /*data*/,
+                                                   wl_registry* /*registry*/,
                                                    uint32_t /*name*/) {
   // Handle global removal if needed
 }
 
 // Seat callbacks
-void WaylandManager::seat_handle_capabilities(void *data, wl_seat *seat,
+void WaylandManager::seat_handle_capabilities(void* data, wl_seat* seat,
                                               uint32_t capabilities) {
-  auto *wm = static_cast<WaylandManager *>(data);
+  auto* wm = static_cast<WaylandManager*>(data);
 
   if (capabilities & WL_SEAT_CAPABILITY_POINTER) {
     if (!wm->pointer_) {
@@ -333,29 +333,29 @@ void WaylandManager::seat_handle_capabilities(void *data, wl_seat *seat,
   }
 }
 
-void WaylandManager::seat_handle_name(void * /*data*/, wl_seat * /*seat*/,
-                                      const char * /*name*/) {
+void WaylandManager::seat_handle_name(void* /*data*/, wl_seat* /*seat*/,
+                                      const char* /*name*/) {
   // Optional: log seat name
 }
 
 // Pointer callbacks
-void WaylandManager::pointer_handle_enter(void * /*data*/,
-                                          wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_enter(void* /*data*/,
+                                          wl_pointer* /*pointer*/,
                                           uint32_t /*serial*/,
-                                          wl_surface * /*surface*/,
+                                          wl_surface* /*surface*/,
                                           wl_fixed_t /*x*/, wl_fixed_t /*y*/) {
 }
 
-void WaylandManager::pointer_handle_leave(void * /*data*/,
-                                          wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_leave(void* /*data*/,
+                                          wl_pointer* /*pointer*/,
                                           uint32_t /*serial*/,
-                                          wl_surface * /*surface*/) {
+                                          wl_surface* /*surface*/) {
 }
 
-void WaylandManager::pointer_handle_motion(void *data, wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_motion(void* data, wl_pointer* /*pointer*/,
                                            uint32_t /*time*/, wl_fixed_t x,
                                            wl_fixed_t y) {
-  auto *wm = static_cast<WaylandManager *>(data);
+  auto* wm = static_cast<WaylandManager*>(data);
   wm->pointer_x_ = wl_fixed_to_int(x);
   wm->pointer_y_ = wl_fixed_to_int(y);
 
@@ -364,54 +364,54 @@ void WaylandManager::pointer_handle_motion(void *data, wl_pointer * /*pointer*/,
   }
 }
 
-void WaylandManager::pointer_handle_button(void *data, wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_button(void* data, wl_pointer* /*pointer*/,
                                            uint32_t /*serial*/,
                                            uint32_t /*time*/, uint32_t button,
                                            uint32_t state) {
-  auto *wm = static_cast<WaylandManager *>(data);
+  auto* wm = static_cast<WaylandManager*>(data);
 
   if (wm->pointer_button_callback_) {
     wm->pointer_button_callback_(button, state, wm->pointer_x_, wm->pointer_y_);
   }
 }
 
-void WaylandManager::pointer_handle_axis(void * /*data*/,
-                                         wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_axis(void* /*data*/,
+                                         wl_pointer* /*pointer*/,
                                          uint32_t /*time*/, uint32_t /*axis*/,
                                          wl_fixed_t /*value*/) {
 }
 
-void WaylandManager::pointer_handle_frame(void * /*data*/,
-                                          wl_pointer * /*pointer*/) {
+void WaylandManager::pointer_handle_frame(void* /*data*/,
+                                          wl_pointer* /*pointer*/) {
 }
 
-void WaylandManager::pointer_handle_axis_source(void * /*data*/,
-                                                wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_axis_source(void* /*data*/,
+                                                wl_pointer* /*pointer*/,
                                                 uint32_t /*source*/) {
 }
 
-void WaylandManager::pointer_handle_axis_stop(void * /*data*/,
-                                              wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_axis_stop(void* /*data*/,
+                                              wl_pointer* /*pointer*/,
                                               uint32_t /*time*/,
                                               uint32_t /*axis*/) {
 }
 
-void WaylandManager::pointer_handle_axis_discrete(void * /*data*/,
-                                                  wl_pointer * /*pointer*/,
+void WaylandManager::pointer_handle_axis_discrete(void* /*data*/,
+                                                  wl_pointer* /*pointer*/,
                                                   uint32_t /*axis*/,
                                                   int32_t /*discrete*/) {
 }
 
 // Layer surface callbacks
 void WaylandManager::layer_surface_handle_configure(
-    void * /*data*/, zwlr_layer_surface_v1 *surface, uint32_t serial,
+    void* /*data*/, zwlr_layer_surface_v1* surface, uint32_t serial,
     uint32_t width, uint32_t height) {
   zwlr_layer_surface_v1_ack_configure(surface, serial);
   Logger::instance().debug("Layer surface configured: {}x{}", width, height);
 }
 
 void WaylandManager::layer_surface_handle_closed(
-    void * /*data*/, zwlr_layer_surface_v1 * /*surface*/) {
+    void* /*data*/, zwlr_layer_surface_v1* /*surface*/) {
   Logger::instance().warn("Layer surface closed");
 }
 

@@ -9,7 +9,7 @@
 int tests_passed = 0;
 int tests_failed = 0;
 
-void test_assert(bool condition, const char *test_name) {
+void test_assert(bool condition, const char* test_name) {
   if (condition) {
     std::cout << "✓ " << test_name << std::endl;
     tests_passed++;

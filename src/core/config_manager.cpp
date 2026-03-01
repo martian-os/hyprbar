@@ -10,13 +10,13 @@ namespace hyprbar {
 // Simple JSON parser (minimal implementation for basic needs)
 class JsonParser {
 public:
-  static std::optional<ConfigValue> parse(const std::string &json) {
+  static std::optional<ConfigValue> parse(const std::string& json) {
     JsonParser parser(json);
     return parser.parse_value();
   }
 
 private:
-  JsonParser(const std::string &json) : json_(json), pos_(0) {
+  JsonParser(const std::string& json) : json_(json), pos_(0) {
   }
 
   void skip_whitespace() {
@@ -231,14 +231,14 @@ private:
 };
 
 std::string ConfigManager::get_default_config_path() {
-  const char *home = getenv("HOME");
+  const char* home = getenv("HOME");
   if (!home) {
     return "/tmp/hyprbar.json";
   }
   return std::string(home) + "/.config/hyprbar/config.json";
 }
 
-bool ConfigManager::load(const std::string &path) {
+bool ConfigManager::load(const std::string& path) {
   std::ifstream file(path);
   if (!file.is_open()) {
     error_ = "Could not open config file: " + path;
@@ -251,11 +251,11 @@ bool ConfigManager::load(const std::string &path) {
   return load_from_string(buffer.str());
 }
 
-bool ConfigManager::load_from_string(const std::string &json) {
+bool ConfigManager::load_from_string(const std::string& json) {
   return parse_json(json);
 }
 
-bool ConfigManager::parse_json(const std::string &json) {
+bool ConfigManager::parse_json(const std::string& json) {
   auto root = JsonParser::parse(json);
   if (!root || !root->is_object()) {
     error_ = "Invalid JSON: root must be an object";
@@ -279,7 +279,7 @@ bool ConfigManager::parse_json(const std::string &json) {
   return true;
 }
 
-bool ConfigManager::parse_bar_config(const ConfigValue &value) {
+bool ConfigManager::parse_bar_config(const ConfigValue& value) {
   if (!value.is_object()) {
     error_ = "Bar config must be an object";
     return false;
@@ -308,13 +308,13 @@ bool ConfigManager::parse_bar_config(const ConfigValue &value) {
   return true;
 }
 
-bool ConfigManager::parse_widgets(const ConfigValue &value) {
+bool ConfigManager::parse_widgets(const ConfigValue& value) {
   if (!value.is_array()) {
     error_ = "Widgets must be an array";
     return false;
   }
 
-  for (const auto &widget_val : value.array_value) {
+  for (const auto& widget_val : value.array_value) {
     if (!widget_val.is_object()) {
       error_ = "Each widget must be an object";
       return false;
@@ -343,7 +343,7 @@ bool ConfigManager::parse_widgets(const ConfigValue &value) {
   return true;
 }
 
-BarConfig::Position ConfigManager::parse_position(const std::string &pos) {
+BarConfig::Position ConfigManager::parse_position(const std::string& pos) {
   std::string lower = pos;
   std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
@@ -360,7 +360,7 @@ BarConfig::Position ConfigManager::parse_position(const std::string &pos) {
 }
 
 WidgetConfig::Position
-ConfigManager::parse_widget_position(const std::string &pos) {
+ConfigManager::parse_widget_position(const std::string& pos) {
   std::string lower = pos;
   std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 

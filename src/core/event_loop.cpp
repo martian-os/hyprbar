@@ -42,7 +42,7 @@ void EventLoop::remove_fd(int fd) {
   epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
 
   auto it = std::find_if(handlers_.begin(), handlers_.end(),
-                         [fd](const FdHandler &h) { return h.fd == fd; });
+                         [fd](const FdHandler& h) { return h.fd == fd; });
 
   if (it != handlers_.end()) {
     handlers_.erase(it);
@@ -84,7 +84,7 @@ int EventLoop::add_timer_once(Duration delay, TimerCallback callback) {
 }
 
 void EventLoop::cancel_timer(int timer_id) {
-  for (auto &timer : timers_) {
+  for (auto& timer : timers_) {
     if (timer.id == timer_id) {
       timer.cancelled = true;
       break;
@@ -95,7 +95,7 @@ void EventLoop::cancel_timer(int timer_id) {
 void EventLoop::process_timers() {
   auto now = std::chrono::steady_clock::now();
 
-  for (auto &timer : timers_) {
+  for (auto& timer : timers_) {
     if (timer.cancelled) {
       continue;
     }
@@ -108,7 +108,7 @@ void EventLoop::process_timers() {
   remove_cancelled_timers();
 }
 
-void EventLoop::handle_expired_timer(Timer &timer, TimePoint now) {
+void EventLoop::handle_expired_timer(Timer& timer, TimePoint now) {
   timer.callback();
 
   if (timer.repeating) {
@@ -120,7 +120,7 @@ void EventLoop::handle_expired_timer(Timer &timer, TimePoint now) {
 
 void EventLoop::remove_cancelled_timers() {
   timers_.erase(std::remove_if(timers_.begin(), timers_.end(),
-                               [](const Timer &t) { return t.cancelled; }),
+                               [](const Timer& t) { return t.cancelled; }),
                 timers_.end());
 }
 
@@ -132,7 +132,7 @@ int EventLoop::get_next_timer_timeout() const {
   auto now = std::chrono::steady_clock::now();
   auto next_expiry = timers_[0].next_expiry;
 
-  for (const auto &timer : timers_) {
+  for (const auto& timer : timers_) {
     if (!timer.cancelled && timer.next_expiry < next_expiry) {
       next_expiry = timer.next_expiry;
     }
@@ -183,7 +183,7 @@ bool EventLoop::dispatch(int timeout_ms) {
     uint32_t revents = events[i].events;
 
     auto it = std::find_if(handlers_.begin(), handlers_.end(),
-                           [fd](const FdHandler &h) { return h.fd == fd; });
+                           [fd](const FdHandler& h) { return h.fd == fd; });
 
     if (it != handlers_.end()) {
       it->handler(fd, revents);
