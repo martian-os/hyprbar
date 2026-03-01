@@ -1,56 +1,193 @@
 # Hyprbar
 
-A Wayland compositor bar for Hyprland written in C++.
+A modular Wayland status bar for wlroots-based compositors (Hyprland, Sway, River), written in C++17.
+
+![CI Status](https://github.com/martian-os/hyprbar/actions/workflows/ci.yml/badge.svg)
 
 ## Features
 
-- Native Wayland protocol integration
-- Lightweight C++ implementation
-- Designed for Hyprland compositor
+- 🎨 **Native Wayland:** Uses wlr-layer-shell protocol for proper bar positioning
+- ⚡ **Lightweight:** Pure C++17 with minimal dependencies (Cairo, Wayland)
+- 🔧 **Modular Widgets:** ScriptWidget system allows widgets in any language
+- 📸 **Screenshot Mode:** Test bar appearance without running compositor
+- 🎯 **Event Loop:** epoll-based for efficient Wayland integration
+- 🛡️ **Quality Enforced:** CI with clang-format, pre-commit hooks
 
-## Building
+## Compatibility
+
+**✅ Works On:**
+- Hyprland
+- Sway
+- River
+- Any wlroots-based compositor
+
+**❌ Does NOT Work On:**
+- GNOME Wayland (no wlr-layer-shell)
+- KDE Plasma Wayland (different protocol)
+
+## Quick Start
 
 ### Prerequisites
 
-- Clang compiler
-- Wayland development libraries (`libwayland-dev`)
-- Make
+```bash
+# Debian/Ubuntu
+sudo apt install clang libwayland-dev libcairo2-dev libpango1.0-dev make
 
-### Installation
+# Arch
+sudo pacman -S clang wayland cairo pango make
+```
+
+### Build & Run
 
 ```bash
-# Install dependencies (Debian/Ubuntu)
-sudo apt install clang libwayland-dev make
+# Clone
+git clone https://github.com/martian-os/hyprbar.git
+cd hyprbar
 
 # Build
 make
 
-# Run
+# Run (on Hyprland/Sway/River)
 ./bin/hyprbar
+
+# Test without compositor (screenshot mode)
+./bin/hyprbar --screenshot output.png
 ```
+
+## Configuration
+
+Config file: `~/.config/hyprbar/config.json`
+
+```json
+{
+  "bar": {
+    "position": "top",
+    "height": 40,
+    "background": "#1e1e2e",
+    "foreground": "#cdd6f4"
+  },
+  "widgets": [
+    {
+      "type": "script",
+      "config": {
+        "command": "~/.config/hyprbar/widgets/cpu.sh",
+        "interval": 2000,
+        "color": "#f38ba8",
+        "size": 14
+      }
+    },
+    {
+      "type": "clock",
+      "config": {
+        "format": "%H:%M:%S",
+        "color": "#cdd6f4",
+        "size": 14
+      }
+    }
+  ]
+}
+```
+
+## Widget System
+
+Hyprbar uses **ScriptWidget** - any script that prints to stdout can be a widget!
+
+### Example CPU Widget (`~/.config/hyprbar/widgets/cpu.sh`)
+
+```bash
+#!/bin/bash
+# Read CPU usage from /proc/stat
+prev=$(cat /tmp/hyprbar_cpu_prev 2>/dev/null || echo "0 0")
+read prev_idle prev_total <<< "$prev"
+
+cpu_line=$(head -1 /proc/stat)
+read -a vals <<< "${cpu_line#cpu }"
+idle=${vals[3]}
+total=0
+for v in "${vals[@]}"; do total=$((total + v)); done
+
+idle_delta=$((idle - prev_idle))
+total_delta=$((total - prev_total))
+usage=$((100 * (total_delta - idle_delta) / total_delta))
+
+echo "$idle $total" > /tmp/hyprbar_cpu_prev
+echo "CPU: ${usage}%"
+```
+
+More examples in `examples/widgets/`:
+- `cpu.sh` - CPU usage
+- `memory.sh` - RAM usage
+- `battery.sh` - Battery status
+- `date.sh` - Custom date formatting
+- `uptime.sh` - System uptime
+
+See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full widget documentation.
 
 ## Development
 
 ### Build Targets
 
-- `make` - Build the project
-- `make test` - Build and run tests
-- `make clean` - Remove build artifacts
-- `make debug` - Build with debug symbols
-- `make release` - Build optimized release version
-- `make install` - Install to /usr/local/bin
-- `make uninstall` - Remove from /usr/local/bin
-
-### Testing
-
 ```bash
-make test
+make           # Build project
+make test      # Run tests
+make clean     # Remove build artifacts
+make debug     # Build with debug symbols
+make release   # Optimized release build
+make lint      # Check code formatting
+make install   # Install to /usr/local/bin
 ```
 
-## License
+### Project Structure
 
-MIT License
+```
+hyprbar/
+├── src/
+│   ├── core/           # Event loop, config, logging
+│   ├── wayland/        # Wayland protocol integration
+│   ├── rendering/      # Cairo rendering, surfaces
+│   └── widgets/        # Widget system
+├── include/hyprbar/    # Public headers
+├── tests/              # Unit tests
+├── examples/           # Example widget scripts
+└── docs/               # Architecture & guides
+```
+
+### Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design documentation.
+
+**Key Design Decisions:**
+- **EventLoop over async/await:** Direct epoll integration with Wayland
+- **Flex-like layout:** Familiar to web developers
+- **ScriptWidget pattern:** Any language can create widgets
+- **Dual surface rendering:** Wayland compositor + file-based screenshots
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Contributions welcome! Guidelines:
+
+1. **Code Quality:** Passes clang-format and pre-commit checks
+2. **Tests:** Add tests for new features
+3. **Documentation:** Update relevant docs
+4. **Architecture:** Follow existing patterns (see ARCHITECTURE.md)
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md) - System design and patterns
+- [Examples](docs/EXAMPLES.md) - Widget examples and configuration
+- [Implementation Status](docs/IMPLEMENTATION_STATUS.md) - Current progress
+- [Code Quality](docs/CODE_QUALITY.md) - Coding standards
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details
+
+## Credits
+
+Built by [Martian](https://github.com/martian-os) for the Hyprland community.
+
+Uses:
+- [Wayland](https://wayland.freedesktop.org/) - Display protocol
+- [wlr-protocols](https://gitlab.freedesktop.org/wlroots/wlr-protocols) - Layer shell
+- [Cairo](https://www.cairographics.org/) - 2D graphics
+- [Pango](https://pango.gnome.org/) - Text rendering
