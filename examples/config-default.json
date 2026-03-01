@@ -1,0 +1,10 @@
+{
+    "bar": {
+        "position": "top",
+        "height": 30,
+        "background": "#1e1e2e",
+        "foreground": "#cdd6f4",
+        "font": "monospace 14"
+    },
+    "widgets": []
+}

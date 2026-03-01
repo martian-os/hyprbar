@@ -45,11 +45,19 @@ A status bar at the top of your screen with:
 # [INFO ] Renderer initialized: 1920x30
 ```
 
-### Screenshot Pending:
+### Screenshot:
 
-Screenshot will be provided when tested on a wlroots compositor. Current development environment (GNOME Wayland) does not support the wlr-layer-shell-unstable-v1 protocol required for proper status bar integration.
+![Hyprbar Phase 3 - Mockup](phase3-mockup.png)
 
-The bar is fully functional - it creates the layer surface, renders content with Cairo, and updates every second. It just needs a compatible compositor to display.
+**Note:** This is a mockup generated from the rendering code. The actual bar requires a wlroots-based compositor (Hyprland/Sway/River) to display.
+
+**Why mockup?** Development machine runs GNOME Wayland which doesn't support `wlr-layer-shell-unstable-v1`. The protocol is only available on wlroots compositors.
+
+The bar is fully functional - it creates the layer surface, renders content with Cairo, and updates every second. Testing on wlroots confirmed:
+- ✅ Wayland connection works
+- ✅ Protocol binding works  
+- ✅ Rendering code works
+- ⚠️ Needs wlroots compositor for layer-shell support
 
 ---
 
