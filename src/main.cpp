@@ -1,4 +1,6 @@
 #include "hyprbar/core/event_loop.h"
+#include "hyprbar/core/logger.h"
+#include "hyprbar/core/config_manager.h"
 #include <iostream>
 #include <wayland-client.h>
 #include <string>
@@ -6,11 +8,13 @@
 #include <memory>
 #include <sys/epoll.h>
 
+using namespace hyprbar;
+
 // Global Wayland objects
 static struct wl_display *display = nullptr;
 static struct wl_compositor *compositor = nullptr;
 static struct wl_surface *surface = nullptr;
-static std::unique_ptr<hyprbar::EventLoop> event_loop = nullptr;
+static std::unique_ptr<EventLoop> event_loop = nullptr;
 
 // Registry listener to bind Wayland globals
 static void registry_handle_global(void* /*data*/, struct wl_registry *registry,
@@ -34,24 +38,39 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 int main(int /*argc*/, char** /*argv*/) {
-    std::cout << "Hyprbar v0.1.0 - Wayland compositor bar" << std::endl;
+    // Initialize logger
+    Logger::instance().set_level(Logger::Level::Debug);
+    Logger::instance().info("Hyprbar v0.1.0 starting...");
+
+    // Load configuration (use default if not found)
+    ConfigManager config_mgr;
+    std::string config_path = ConfigManager::get_default_config_path();
+    
+    if (!config_mgr.load(config_path)) {
+        Logger::instance().warn("Could not load config from {}, using defaults", config_path);
+    }
+
+    const auto& config = config_mgr.get_config();
+    Logger::instance().debug("Bar height: {}", config.bar.height);
+    Logger::instance().debug("Widgets configured: {}", config.widgets.size());
 
     // Initialize event loop
     try {
-        event_loop = std::make_unique<hyprbar::EventLoop>();
+        event_loop = std::make_unique<EventLoop>();
+        Logger::instance().debug("Event loop initialized");
     } catch (const std::exception& e) {
-        std::cerr << "Error: Failed to create event loop: " << e.what() << std::endl;
+        Logger::instance().error("Failed to create event loop: {}", e.what());
         return 1;
     }
 
     // Connect to Wayland display
     display = wl_display_connect(nullptr);
     if (!display) {
-        std::cerr << "Error: Could not connect to Wayland display" << std::endl;
+        Logger::instance().error("Could not connect to Wayland display");
         return 1;
     }
 
-    std::cout << "Connected to Wayland display" << std::endl;
+    Logger::instance().info("Connected to Wayland display");
 
     // Get registry and add listener
     struct wl_registry *registry = wl_display_get_registry(display);
@@ -61,38 +80,38 @@ int main(int /*argc*/, char** /*argv*/) {
     wl_display_roundtrip(display);
 
     if (!compositor) {
-        std::cerr << "Error: Could not bind compositor" << std::endl;
+        Logger::instance().error("Could not bind compositor");
         wl_display_disconnect(display);
         return 1;
     }
 
-    std::cout << "Compositor bound successfully" << std::endl;
+    Logger::instance().info("Compositor bound successfully");
 
     // Create a surface
     surface = wl_compositor_create_surface(compositor);
     if (!surface) {
-        std::cerr << "Error: Could not create surface" << std::endl;
+        Logger::instance().error("Could not create surface");
         wl_display_disconnect(display);
         return 1;
     }
 
-    std::cout << "Surface created" << std::endl;
+    Logger::instance().info("Surface created");
 
     // Add Wayland display fd to event loop
     int wayland_fd = wl_display_get_fd(display);
     event_loop->add_fd(wayland_fd, EPOLLIN, [](int /*fd*/, uint32_t /*events*/) {
         if (wl_display_dispatch(display) < 0) {
-            std::cerr << "Wayland dispatch error" << std::endl;
+            Logger::instance().error("Wayland dispatch error");
             event_loop->shutdown();
         }
     });
 
     // Add a test timer (prints every 2 seconds)
     event_loop->add_timer(std::chrono::milliseconds(2000), []() {
-        std::cout << "[Timer] Hyprbar running..." << std::endl;
+        Logger::instance().debug("Heartbeat - bar running");
     });
 
-    std::cout << "Event loop starting..." << std::endl;
+    Logger::instance().info("Event loop starting...");
 
     // Main event loop
     while (event_loop->dispatch()) {
@@ -105,7 +124,7 @@ int main(int /*argc*/, char** /*argv*/) {
         wl_display_dispatch_pending(display);
     }
 
-    std::cout << "Shutting down..." << std::endl;
+    Logger::instance().info("Shutting down...");
 
     // Cleanup
     if (surface) wl_surface_destroy(surface);

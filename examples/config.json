@@ -1,0 +1,43 @@
+{
+  "bar": {
+    "position": "top",
+    "height": 30,
+    "background": "#1e1e2e",
+    "foreground": "#cdd6f4",
+    "font": "monospace 10"
+  },
+  "widgets": [
+    {
+      "type": "workspaces",
+      "position": "left",
+      "config": {
+        "format": "{id}: {name}",
+        "show_empty": false
+      }
+    },
+    {
+      "type": "clock",
+      "position": "center",
+      "config": {
+        "format": "%Y-%m-%d %H:%M:%S",
+        "update_interval": 1000
+      }
+    },
+    {
+      "type": "cpu",
+      "position": "right",
+      "config": {
+        "format": "CPU: {usage}%",
+        "update_interval": 2000
+      }
+    },
+    {
+      "type": "network",
+      "position": "right",
+      "config": {
+        "interface": "wlan0",
+        "show_icon": true
+      }
+    }
+  ]
+}
