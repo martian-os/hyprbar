@@ -139,8 +139,16 @@ void Renderer::draw_text(const std::string& text, double x, double y,
   // Set text
   pango_layout_set_text(layout, text.c_str(), -1);
 
+  // Get baseline position to match Cairo toy API behavior
+  PangoLayoutIter* iter = pango_layout_get_iter(layout);
+  int baseline = pango_layout_iter_get_baseline(iter);
+  pango_layout_iter_free(iter);
+
+  // Adjust y to account for baseline (Pango uses top-left, Cairo used baseline)
+  double adjusted_y = y - (baseline / (double)PANGO_SCALE);
+
   // Render at position
-  cairo_move_to(cr_, x, y);
+  cairo_move_to(cr_, x, adjusted_y);
   pango_cairo_show_layout(cr_, layout);
 
   // Cleanup
