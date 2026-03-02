@@ -18,25 +18,9 @@ std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
 bool WidgetManager::initialize(const ConfigManager& config_mgr) {
   const auto& config = config_mgr.get_config();
 
-  // Parse bar font for defaults (e.g., "Noto Sans, Noto Color Emoji 14")
-  std::string bar_font = config.bar.font;
-  std::string default_font_family = "monospace";
-  double default_font_size = 14.0;
-
-  // Extract font family and size from bar font string
-  size_t last_space = bar_font.rfind(' ');
-  if (last_space != std::string::npos) {
-    std::string size_str = bar_font.substr(last_space + 1);
-    try {
-      default_font_size = std::stod(size_str);
-      default_font_family = bar_font.substr(0, last_space);
-    } catch (...) {
-      // If parsing fails, treat whole string as font family
-      default_font_family = bar_font;
-    }
-  } else {
-    default_font_family = bar_font;
-  }
+  // Get bar defaults for widget inheritance
+  std::string default_font_family = config.bar.font;
+  double default_font_size = config.bar.size;
 
   for (const auto& widget_config : config.widgets) {
     auto widget = create_widget(widget_config.type);

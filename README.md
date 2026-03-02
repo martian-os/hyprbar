@@ -75,7 +75,8 @@ Specify custom config: `hyprbar --config /path/to/config.json`
 - **height**: Bar height in pixels
 - **background**: Background color in hex (#RRGGBB or #RRGGBBAA for transparency)
 - **foreground**: Default text color (inherited by widgets)
-- **font**: Font family and size (e.g., "Noto Sans, Noto Color Emoji 14")
+- **font**: Font family (e.g., "Noto Sans, Noto Color Emoji")
+- **size**: Font size in points (default: 14)
 
 ### Widget Configuration
 
@@ -87,7 +88,8 @@ Widgets **inherit** font, size, and color from bar defaults. Override only when 
   "bar": {
     "background": "#1e1e2ecc",
     "foreground": "#cdd6f4",
-    "font": "Noto Sans, Noto Color Emoji 14"
+    "font": "Noto Sans, Noto Color Emoji",
+    "size": 14
   },
   "widgets": [
     {
@@ -132,7 +134,8 @@ Widgets **inherit** font, size, and color from bar defaults. Override only when 
     "height": 30,
     "background": "#1e1e2ecc",
     "foreground": "#cdd6f4",
-    "font": "Noto Sans, Noto Color Emoji 14"
+    "font": "Noto Sans, Noto Color Emoji",
+    "size": 14
   },
   "widgets": [
     {

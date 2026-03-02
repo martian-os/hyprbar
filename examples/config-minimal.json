@@ -4,7 +4,8 @@
     "height": 30,
     "background": "#1e1e2ecc",
     "foreground": "#89b4fa",
-    "font": "Noto Sans, Noto Color Emoji 14"
+    "font": "Noto Sans, Noto Color Emoji",
+    "size": 14
   },
   "widgets": [
     {

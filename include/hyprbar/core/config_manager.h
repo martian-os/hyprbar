@@ -112,7 +112,8 @@ struct BarConfig {
   uint32_t height = 30;
   std::string background = "#1e1e2e";
   std::string foreground = "#cdd6f4";
-  std::string font = "monospace 10";
+  std::string font = "monospace";
+  double size = 14.0;
 };
 
 /**

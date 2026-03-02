@@ -313,6 +313,14 @@ bool ConfigManager::parse_bar_config(const ConfigValue& value) {
     config_.bar.font = font->as_string();
   }
 
+  if (auto size = value.get("size")) {
+    if (size->type == ConfigValue::Type::Integer) {
+      config_.bar.size = static_cast<double>(size->as_int());
+    } else if (size->type == ConfigValue::Type::Double) {
+      config_.bar.size = size->as_double();
+    }
+  }
+
   return true;
 }
 
