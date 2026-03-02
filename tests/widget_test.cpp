@@ -1,6 +1,8 @@
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/rendering/renderer.h"
+#include "hyprbar/widgets/hyprland_widget.h"
 #include "hyprbar/widgets/script_widget.h"
+#include "hyprbar/widgets/tray_widget.h"
 #include "test_utils.h"
 #include <chrono>
 #include <thread>
@@ -124,6 +126,75 @@ void test_font_size_affects_width() {
                "Width ratio roughly matches size ratio");
 }
 
+void test_tray_initialization() {
+  TrayWidget widget;
+  std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["icon_size"] = ConfigValue(static_cast<int64_t>(16));
+  cfg_map["spacing"] = ConfigValue(static_cast<int64_t>(5));
+  ConfigValue cfg(cfg_map);
+
+  bool success = widget.initialize(cfg);
+  test::assert(success, "Tray widget initialization");
+}
+
+void test_tray_dimensions() {
+  TrayWidget widget;
+  std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["icon_size"] = ConfigValue(static_cast<int64_t>(20));
+  ConfigValue cfg(cfg_map);
+  widget.initialize(cfg);
+
+  int width = widget.get_desired_width();
+  int height = widget.get_desired_height();
+
+  test::assert(width >= 0, "Tray has non-negative width");
+  test::assert(height >= 0, "Tray has non-negative height");
+}
+
+void test_tray_render() {
+  TrayWidget widget;
+  std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["icon_size"] = ConfigValue(static_cast<int64_t>(16));
+  ConfigValue cfg(cfg_map);
+  widget.initialize(cfg);
+
+  // Create renderer
+  Renderer renderer;
+  renderer.initialize(800, 30);
+
+  // Should not crash when rendering with no icons
+  renderer.begin_frame();
+  widget.render(renderer, 0, 0, 800, 30);
+  renderer.end_frame();
+
+  test::assert(true, "Tray renders without crashing");
+}
+
+void test_hyprland_initialization() {
+  HyprlandWidget widget;
+  std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["max_workspaces"] = ConfigValue(static_cast<int64_t>(10));
+  cfg_map["active_color"] = ConfigValue("#89b4fa");
+  ConfigValue cfg(cfg_map);
+
+  bool success = widget.initialize(cfg);
+  test::assert(success, "Hyprland widget initialization");
+}
+
+void test_hyprland_dimensions() {
+  HyprlandWidget widget;
+  std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["max_workspaces"] = ConfigValue(static_cast<int64_t>(5));
+  ConfigValue cfg(cfg_map);
+  widget.initialize(cfg);
+
+  int width = widget.get_desired_width();
+  int height = widget.get_desired_height();
+
+  test::assert(width >= 0, "Hyprland has non-negative width");
+  test::assert(height >= 0, "Hyprland has non-negative height");
+}
+
 void run_widget_tests() {
   std::cout << "\n--- Widget Tests ---" << std::endl;
   test_script_initialization();
@@ -132,4 +203,9 @@ void run_widget_tests() {
   test_script_dimensions();
   test_integer_vs_double_config();
   test_font_size_affects_width();
+  test_tray_initialization();
+  test_tray_dimensions();
+  test_tray_render();
+  test_hyprland_initialization();
+  test_hyprland_dimensions();
 }
