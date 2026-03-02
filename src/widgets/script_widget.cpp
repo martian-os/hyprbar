@@ -49,8 +49,9 @@ bool ScriptWidget::initialize(const ConfigValue& config) {
     color_ = obj.at("color").string_value;
   }
 
-  last_update_ = std::chrono::steady_clock::now();
-  last_output_ = execute_command();
+  // Set last_update to epoch so first update() will trigger immediately
+  last_update_ = std::chrono::steady_clock::time_point();
+  last_output_ = "";
 
   Logger::instance().debug("Script widget initialized: {}", command_);
   return true;

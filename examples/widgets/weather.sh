@@ -16,11 +16,17 @@ if [ -f "$cache_file" ]; then
 fi
 
 # Fetch weather (use Berlin as default, can be customized)
+# Use --connect-timeout and --max-time to avoid hanging
 location="${HYPRBAR_LOCATION:-Berlin}"
-weather=$(curl -s "wttr.in/${location}?format=%c+%t" 2>/dev/null | tr -d '\n')
+weather=$(curl -s --connect-timeout 3 --max-time 5 "wttr.in/${location}?format=%c+%t" 2>/dev/null | tr -d '\n')
 
 if [ -n "$weather" ]; then
     echo "$weather" | tee "$cache_file"
 else
-    echo "Weather: N/A"
+    # If fetch fails, check if we have old cached data
+    if [ -f "$cache_file" ]; then
+        cat "$cache_file"
+    else
+        echo "Weather: N/A"
+    fi
 fi
