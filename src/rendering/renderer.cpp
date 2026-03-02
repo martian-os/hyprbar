@@ -125,14 +125,27 @@ void Renderer::draw_text(const std::string& text, double x, double y,
                            size);
 
   cairo_save(cr_);
-
-  cairo_select_font_face(cr_, font.c_str(), CAIRO_FONT_SLANT_NORMAL,
-                         CAIRO_FONT_WEIGHT_NORMAL);
-  cairo_set_font_size(cr_, size);
   cairo_set_source_rgba(cr_, color.r, color.g, color.b, color.a);
 
+  // Create Pango layout for proper emoji/font rendering
+  PangoLayout* layout = pango_cairo_create_layout(cr_);
+
+  // Set font description
+  PangoFontDescription* desc = pango_font_description_new();
+  pango_font_description_set_family(desc, font.c_str());
+  pango_font_description_set_size(desc, size * PANGO_SCALE);
+  pango_layout_set_font_description(layout, desc);
+
+  // Set text
+  pango_layout_set_text(layout, text.c_str(), -1);
+
+  // Render at position
   cairo_move_to(cr_, x, y);
-  cairo_show_text(cr_, text.c_str());
+  pango_cairo_show_layout(cr_, layout);
+
+  // Cleanup
+  pango_font_description_free(desc);
+  g_object_unref(layout);
 
   cairo_restore(cr_);
 }

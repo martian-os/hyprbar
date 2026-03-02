@@ -4,7 +4,7 @@
     "height": 32,
     "background": "#1e1e2ecc",
     "foreground": "#cdd6f4",
-    "font": "Noto Sans, Noto Color Emoji"
+    "font": "Noto Sans, Noto Color Emoji 14"
   },
   "widgets": [
     {
@@ -13,8 +13,6 @@
       "config": {
         "command": "../widgets/date.sh",
         "interval": 1000,
-        "font": "Noto Sans, Noto Color Emoji",
-        "size": 14,
         "color": "#89b4fa"
       }
     },
@@ -24,7 +22,6 @@
       "config": {
         "command": "../widgets/uptime.sh",
         "interval": 60000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#94e2d5"
       }
@@ -35,8 +32,6 @@
       "config": {
         "command": "../widgets/weather.sh",
         "interval": 300000,
-        "font": "Noto Sans, Noto Color Emoji",
-        "size": 14,
         "color": "#f9e2af"
       }
     },
@@ -46,7 +41,6 @@
       "config": {
         "command": "../widgets/cpu.sh",
         "interval": 2000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#f38ba8"
       }
@@ -57,7 +51,6 @@
       "config": {
         "command": "../widgets/memory.sh",
         "interval": 5000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#fab387"
       }
@@ -68,7 +61,6 @@
       "config": {
         "command": "../widgets/disk.sh",
         "interval": 60000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#a6e3a1"
       }
@@ -79,7 +71,6 @@
       "config": {
         "command": "../widgets/volume.sh",
         "interval": 5000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#b4befe"
       }
@@ -90,7 +81,6 @@
       "config": {
         "command": "../widgets/network.sh",
         "interval": 10000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#74c7ec"
       }
@@ -101,7 +91,6 @@
       "config": {
         "command": "../widgets/battery.sh",
         "interval": 30000,
-        "font": "Noto Sans, Noto Color Emoji",
         "size": 12,
         "color": "#cba6f7"
       }

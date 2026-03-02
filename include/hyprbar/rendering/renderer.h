@@ -3,6 +3,7 @@
 #include <cairo/cairo.h>
 #include <cstdint>
 #include <memory>
+#include <pango/pangocairo.h>
 #include <string>
 
 namespace hyprbar {
