@@ -76,14 +76,14 @@ Specify custom config: `hyprbar --config /path/to/config.json`
   "bar": {
     "position": "top",
     "height": 40,
-    "background": "#1e1e2e",
+    "background": "#1e1e2ecc",
     "foreground": "#cdd6f4"
   },
   "widgets": [
     {
       "type": "script",
       "config": {
-        "command": "~/.config/hyprbar/widgets/cpu.sh",
+        "command": "widgets/cpu.sh",
         "interval": 2000,
         "color": "#f38ba8",
         "size": 14
@@ -100,6 +100,25 @@ Specify custom config: `hyprbar --config /path/to/config.json`
   ]
 }
 ```
+
+### Bar Configuration
+
+- **position**: `top`, `bottom`, `left`, `right`
+- **height**: Bar height in pixels
+- **background**: Background color in hex
+  - 6-digit: `#RRGGBB` (opaque)
+  - 8-digit: `#RRGGBBAA` (with alpha/opacity)
+  - Examples: `#1e1e2e` (opaque), `#1e1e2ecc` (80% opacity)
+- **foreground**: Default text color
+- **font**: Default font name
+
+**Opacity Support:** Use 8-digit hex colors for transparency:
+- `#1e1e2eff` = 100% opaque (ff = 255)
+- `#1e1e2ecc` = 80% opacity (cc = 204)
+- `#1e1e2e99` = 60% opacity (99 = 153)
+- `#1e1e2e66` = 40% opacity (66 = 102)
+
+See `examples/config-transparent.json` for a transparent bar config.
 
 ## Widget System
 
