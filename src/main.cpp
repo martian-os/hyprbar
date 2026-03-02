@@ -43,7 +43,8 @@ void render_frame(void* wayland_buffer) {
 
   // Render widgets
   if (app.widget_manager) {
-    app.widget_manager->render(*app.renderer, 1920, app.config.bar.height);
+    app.widget_manager->render(*app.renderer, app.renderer->get_width(),
+                               app.renderer->get_height());
   }
 
   app.renderer->end_frame();
@@ -116,9 +117,23 @@ int run_wayland_mode(ConfigManager& config_mgr) {
 
   app.wayland->set_exclusive_zone(config.bar.height);
 
+  // Wait for compositor to configure surface dimensions
+  wl_display_roundtrip(app.wayland->get_display());
+
+  uint32_t bar_width = app.wayland->get_configured_width();
+  uint32_t bar_height = app.wayland->get_configured_height();
+
+  if (bar_width == 0 || bar_height == 0) {
+    Logger::instance().error("Invalid surface dimensions: {}x{}", bar_width,
+                             bar_height);
+    return 1;
+  }
+
+  Logger::instance().info("Bar surface: {}x{}", bar_width, bar_height);
+
   // Initialize renderer
   app.renderer = std::make_unique<Renderer>();
-  if (!app.renderer->initialize(1920, config.bar.height)) {
+  if (!app.renderer->initialize(bar_width, bar_height)) {
     Logger::instance().error("Failed to initialize renderer");
     return 1;
   }

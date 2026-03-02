@@ -60,6 +60,13 @@ public:
   int get_fd() const;
 
   /**
+   * Get Wayland display
+   */
+  wl_display* get_display() const {
+    return display_;
+  }
+
+  /**
    * Dispatch pending Wayland events
    * @return 0 on success, -1 on error
    */
@@ -144,6 +151,10 @@ private:
   zwlr_layer_shell_v1* layer_shell_;
   zwlr_layer_surface_v1* layer_surface_;
 
+  // Configured surface dimensions (from compositor)
+  uint32_t configured_width_;
+  uint32_t configured_height_;
+
   // Callbacks
   PointerButtonCallback pointer_button_callback_;
   PointerMotionCallback pointer_motion_callback_;
@@ -153,6 +164,16 @@ private:
   int32_t pointer_y_;
 
 public:
+  /**
+   * Get configured surface dimensions
+   */
+  uint32_t get_configured_width() const {
+    return configured_width_;
+  }
+  uint32_t get_configured_height() const {
+    return configured_height_;
+  }
+
   // Static callback handlers (must be public for C linkage)
   static void registry_handle_global(void* data, wl_registry* registry,
                                      uint32_t name, const char* interface,

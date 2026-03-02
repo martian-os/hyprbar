@@ -40,8 +40,8 @@ static const zwlr_layer_surface_v1_listener layer_surface_listener = {
 WaylandManager::WaylandManager()
     : display_(nullptr), registry_(nullptr), compositor_(nullptr),
       shm_(nullptr), seat_(nullptr), pointer_(nullptr), surface_(nullptr),
-      layer_shell_(nullptr), layer_surface_(nullptr), pointer_x_(0),
-      pointer_y_(0) {
+      layer_shell_(nullptr), layer_surface_(nullptr), configured_width_(0),
+      configured_height_(0), pointer_x_(0), pointer_y_(0) {
 }
 
 WaylandManager::~WaylandManager() {
@@ -404,10 +404,15 @@ void WaylandManager::pointer_handle_axis_discrete(void* /*data*/,
 
 // Layer surface callbacks
 void WaylandManager::layer_surface_handle_configure(
-    void* /*data*/, zwlr_layer_surface_v1* surface, uint32_t serial,
-    uint32_t width, uint32_t height) {
+    void* data, zwlr_layer_surface_v1* surface, uint32_t serial, uint32_t width,
+    uint32_t height) {
   zwlr_layer_surface_v1_ack_configure(surface, serial);
   Logger::instance().debug("Layer surface configured: {}x{}", width, height);
+
+  // Store configured dimensions
+  auto* manager = static_cast<WaylandManager*>(data);
+  manager->configured_width_ = width;
+  manager->configured_height_ = height;
 }
 
 void WaylandManager::layer_surface_handle_closed(
