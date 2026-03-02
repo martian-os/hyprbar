@@ -57,8 +57,11 @@ public:
 private:
   std::unique_ptr<Widget> create_widget(const std::string& type);
 
+  enum class Position { Left, Center, Right };
+
   struct WidgetSlot {
     std::unique_ptr<Widget> widget;
+    Position position;
     int x;
     int y;
     int width;

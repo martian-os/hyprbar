@@ -47,8 +47,23 @@ bool WidgetManager::initialize(const ConfigManager& config_mgr) {
       continue;
     }
 
+    // Convert WidgetConfig::Position to WidgetManager::Position
+    Position pos = Position::Left;
+    switch (widget_config.position) {
+    case WidgetConfig::Position::Left:
+      pos = Position::Left;
+      break;
+    case WidgetConfig::Position::Center:
+      pos = Position::Center;
+      break;
+    case WidgetConfig::Position::Right:
+      pos = Position::Right;
+      break;
+    }
+
     WidgetSlot slot;
     slot.widget = std::move(widget);
+    slot.position = pos;
     slot.x = 0;
     slot.y = 0;
     slot.width = 0;
@@ -78,31 +93,114 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
 
   Logger::instance().debug("Rendering {} widgets", widgets_.size());
 
-  // Simple left-to-right layout with 10px spacing
-  int x = 10;
   const int spacing = 10;
+  const int margin = 10;
+
+  // Separate widgets by position
+  std::vector<WidgetSlot*> left_widgets;
+  std::vector<WidgetSlot*> center_widgets;
+  std::vector<WidgetSlot*> right_widgets;
 
   for (auto& slot : widgets_) {
-    int widget_width = slot.widget->get_desired_width();
-    int widget_height = slot.widget->get_desired_height();
-
-    Logger::instance().debug("Widget at x={}, width={}", x, widget_width);
-
-    if (widget_height == 0) {
-      widget_height = bar_height;
+    switch (slot.position) {
+    case Position::Left:
+      left_widgets.push_back(&slot);
+      break;
+    case Position::Center:
+      center_widgets.push_back(&slot);
+      break;
+    case Position::Right:
+      right_widgets.push_back(&slot);
+      break;
     }
+  }
 
-    slot.x = x;
-    slot.y = 0;
-    slot.width = widget_width;
-    slot.height = widget_height;
+  // Calculate total widths
+  int left_total = 0;
+  for (auto* slot : left_widgets) {
+    left_total += slot->widget->get_desired_width() + spacing;
+  }
+  if (!left_widgets.empty())
+    left_total -= spacing; // Remove last spacing
 
-    slot.widget->render(renderer, x, 0, widget_width, bar_height);
+  int center_total = 0;
+  for (auto* slot : center_widgets) {
+    center_total += slot->widget->get_desired_width() + spacing;
+  }
+  if (!center_widgets.empty())
+    center_total -= spacing;
+
+  int right_total = 0;
+  for (auto* slot : right_widgets) {
+    right_total += slot->widget->get_desired_width() + spacing;
+  }
+  if (!right_widgets.empty())
+    right_total -= spacing;
+
+  // Layout left widgets
+  int x = margin;
+  for (auto* slot : left_widgets) {
+    int widget_width = slot->widget->get_desired_width();
+    int widget_height = slot->widget->get_desired_height();
+    if (widget_height == 0)
+      widget_height = bar_height;
+
+    slot->x = x;
+    slot->y = 0;
+    slot->width = widget_width;
+    slot->height = widget_height;
+
+    Logger::instance().debug("Left widget at x={}, width={}", x, widget_width);
+    slot->widget->render(renderer, x, 0, widget_width, bar_height);
 
     x += widget_width + spacing;
   }
 
-  Logger::instance().debug("Rendering complete, used {} pixels", x);
+  // Layout center widgets
+  if (!center_widgets.empty()) {
+    x = (bar_width - center_total) / 2;
+    for (auto* slot : center_widgets) {
+      int widget_width = slot->widget->get_desired_width();
+      int widget_height = slot->widget->get_desired_height();
+      if (widget_height == 0)
+        widget_height = bar_height;
+
+      slot->x = x;
+      slot->y = 0;
+      slot->width = widget_width;
+      slot->height = widget_height;
+
+      Logger::instance().debug("Center widget at x={}, width={}", x,
+                               widget_width);
+      slot->widget->render(renderer, x, 0, widget_width, bar_height);
+
+      x += widget_width + spacing;
+    }
+  }
+
+  // Layout right widgets (from right to left)
+  if (!right_widgets.empty()) {
+    x = bar_width - margin - right_total;
+    for (auto* slot : right_widgets) {
+      int widget_width = slot->widget->get_desired_width();
+      int widget_height = slot->widget->get_desired_height();
+      if (widget_height == 0)
+        widget_height = bar_height;
+
+      slot->x = x;
+      slot->y = 0;
+      slot->width = widget_width;
+      slot->height = widget_height;
+
+      Logger::instance().debug("Right widget at x={}, width={}", x,
+                               widget_width);
+      slot->widget->render(renderer, x, 0, widget_width, bar_height);
+
+      x += widget_width + spacing;
+    }
+  }
+
+  Logger::instance().debug("Layout complete");
 }
 
 void WidgetManager::on_click(int x, int y, uint32_t button) {
