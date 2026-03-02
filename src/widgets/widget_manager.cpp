@@ -18,6 +18,26 @@ std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
 bool WidgetManager::initialize(const ConfigManager& config_mgr) {
   const auto& config = config_mgr.get_config();
 
+  // Parse bar font for defaults (e.g., "Noto Sans, Noto Color Emoji 14")
+  std::string bar_font = config.bar.font;
+  std::string default_font_family = "monospace";
+  double default_font_size = 14.0;
+
+  // Extract font family and size from bar font string
+  size_t last_space = bar_font.rfind(' ');
+  if (last_space != std::string::npos) {
+    std::string size_str = bar_font.substr(last_space + 1);
+    try {
+      default_font_size = std::stod(size_str);
+      default_font_family = bar_font.substr(0, last_space);
+    } catch (...) {
+      // If parsing fails, treat whole string as font family
+      default_font_family = bar_font;
+    }
+  } else {
+    default_font_family = bar_font;
+  }
+
   for (const auto& widget_config : config.widgets) {
     auto widget = create_widget(widget_config.type);
     if (!widget) {
@@ -33,6 +53,17 @@ bool WidgetManager::initialize(const ConfigManager& config_mgr) {
         std::string command = obj.at("command").string_value;
         std::string resolved = config_mgr.resolve_path(command);
         obj["command"] = ConfigValue(resolved);
+      }
+
+      // Apply bar defaults if not specified in widget config
+      if (!obj.count("font")) {
+        obj["font"] = ConfigValue(default_font_family);
+      }
+      if (!obj.count("size")) {
+        obj["size"] = ConfigValue(default_font_size);
+      }
+      if (!obj.count("color")) {
+        obj["color"] = ConfigValue(config.bar.foreground);
       }
     }
 

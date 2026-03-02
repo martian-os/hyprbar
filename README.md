@@ -69,57 +69,101 @@ Default config location: `~/.config/hyprbar/config.json`
 
 Specify custom config: `hyprbar --config /path/to/config.json`
 
-### Example Configuration
+### Bar Configuration
 
+- **position**: `top`, `bottom`, `left`, `right`
+- **height**: Bar height in pixels
+- **background**: Background color in hex (#RRGGBB or #RRGGBBAA for transparency)
+- **foreground**: Default text color (inherited by widgets)
+- **font**: Font family and size (e.g., "Noto Sans, Noto Color Emoji 14")
+
+### Widget Configuration
+
+Widgets **inherit** font, size, and color from bar defaults. Override only when needed.
+
+**Inheritance example:**
 ```json
 {
   "bar": {
-    "position": "top",
-    "height": 40,
     "background": "#1e1e2ecc",
-    "foreground": "#cdd6f4"
+    "foreground": "#cdd6f4",
+    "font": "Noto Sans, Noto Color Emoji 14"
   },
   "widgets": [
     {
       "type": "script",
+      "position": "left",
       "config": {
-        "command": "widgets/cpu.sh",
-        "interval": 2000,
-        "color": "#f38ba8",
-        "size": 14
+        "command": "widgets/date.sh",
+        "interval": 1000
+        // Inherits: font, size (14), color (#cdd6f4)
       }
     },
     {
       "type": "script",
+      "position": "right",
       "config": {
-        "command": "widgets/date.sh",
-        "interval": 1000,
-        "color": "#cdd6f4",
-        "size": 14
+        "command": "widgets/cpu.sh",
+        "interval": 2000,
+        "size": 12,  // Override: smaller text
+        "color": "#f38ba8"  // Override: red color
       }
     }
   ]
 }
 ```
 
-### Bar Configuration
+**Widget properties:**
+- **type**: Widget type (`script`)
+- **position**: `left`, `center`, `right`
+- **config**: Widget-specific configuration
+  - **command**: Script/command to execute (required)
+  - **interval**: Update interval in milliseconds (default: 1000)
+  - **font**: Font family (inherits from bar if not set)
+  - **size**: Font size (inherits from bar if not set)
+  - **color**: Text color hex (inherits from bar.foreground if not set)
 
-- **position**: `top`, `bottom`, `left`, `right`
-- **height**: Bar height in pixels
-- **background**: Background color in hex
-  - 6-digit: `#RRGGBB` (opaque)
-  - 8-digit: `#RRGGBBAA` (with alpha/opacity)
-  - Examples: `#1e1e2e` (opaque), `#1e1e2ecc` (80% opacity)
-- **foreground**: Default text color
-- **font**: Default font name
+### Example Configuration
 
-**Opacity Support:** Use 8-digit hex colors for transparency:
+```json
+{
+  "bar": {
+    "position": "top",
+    "height": 30,
+    "background": "#1e1e2ecc",
+    "foreground": "#cdd6f4",
+    "font": "Noto Sans, Noto Color Emoji 14"
+  },
+  "widgets": [
+    {
+      "type": "script",
+      "position": "left",
+      "config": {
+        "command": "widgets/date.sh",
+        "interval": 1000
+      }
+    },
+    {
+      "type": "script",
+      "position": "right",
+      "config": {
+        "command": "widgets/cpu.sh",
+        "interval": 2000,
+        "size": 12,
+        "color": "#f38ba8"
+      }
+    }
+  ]
+}
+```
+
+**Transparency Support:** Use 8-digit hex colors for transparency:
 - `#1e1e2eff` = 100% opaque (ff = 255)
 - `#1e1e2ecc` = 80% opacity (cc = 204)
 - `#1e1e2e99` = 60% opacity (99 = 153)
 - `#1e1e2e66` = 40% opacity (66 = 102)
 
-See `examples/config-transparent.json` for a transparent bar config.
+See `examples/config-transparent.json` for transparency examples.
 
 ## Widget System
 

@@ -3,7 +3,7 @@
     "position": "top",
     "height": 32,
     "background": "#1e1e2ecc",
-    "foreground": "#cdd6f4",
+    "foreground": "#89b4fa",
     "font": "Noto Sans, Noto Color Emoji 14"
   },
   "widgets": [
@@ -12,8 +12,7 @@
       "position": "left",
       "config": {
         "command": "../widgets/date.sh",
-        "interval": 1000,
-        "color": "#89b4fa"
+        "interval": 1000
       }
     },
     {
