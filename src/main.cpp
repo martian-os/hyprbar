@@ -75,12 +75,10 @@ int run_screenshot_mode(const std::string& output_path,
   app.widget_manager->initialize(config_mgr);
   app.widget_manager->update();
 
-  // Wait briefly for script widgets to execute first time
-  // Most scripts complete in < 100ms, but give 500ms for slower ones
-  Logger::instance().debug("Waiting for widgets to populate...");
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  // Wait for widgets to populate (script widgets run in background threads)
+  app.widget_manager->wait_for_ready(2000); // 2 second timeout
 
-  // Update again after wait to pick up script output
+  // Update again after widgets are ready
   app.widget_manager->update();
 
   // Render one frame

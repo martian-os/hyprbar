@@ -3,6 +3,8 @@
 #include "hyprbar/core/logger.h"
 #include "hyprbar/rendering/renderer.h"
 #include "hyprbar/widgets/script_widget.h"
+#include <chrono>
+#include <thread>
 
 namespace hyprbar {
 
@@ -93,6 +95,44 @@ bool WidgetManager::update() {
     }
   }
   return needs_redraw;
+}
+
+bool WidgetManager::wait_for_ready(int timeout_ms) {
+  auto start = std::chrono::steady_clock::now();
+  const auto timeout = std::chrono::milliseconds(timeout_ms);
+
+  while (true) {
+    bool all_ready = true;
+
+    // Check if all script widgets have output
+    for (const auto& slot : widgets_) {
+      if (slot.widget->get_type() == "script") {
+        auto* script_widget =
+            dynamic_cast<const ScriptWidget*>(slot.widget.get());
+        if (script_widget && !script_widget->has_output()) {
+          all_ready = false;
+          break;
+        }
+      }
+    }
+
+    if (all_ready) {
+      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::steady_clock::now() - start);
+      Logger::instance().debug("All widgets ready after {}ms", elapsed.count());
+      return true;
+    }
+
+    // Check timeout
+    auto elapsed = std::chrono::steady_clock::now() - start;
+    if (elapsed >= timeout) {
+      Logger::instance().warn("Timeout waiting for widgets to populate");
+      return false;
+    }
+
+    // Small sleep to avoid busy-waiting
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
 }
 
 void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {

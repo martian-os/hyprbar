@@ -158,4 +158,9 @@ int ScriptWidget::get_desired_height() const {
   return 0; // Flexible height
 }
 
+bool ScriptWidget::has_output() const {
+  std::lock_guard<std::mutex> lock(output_mutex_);
+  return !last_output_.empty();
+}
+
 } // namespace hyprbar

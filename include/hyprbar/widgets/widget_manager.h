@@ -47,6 +47,14 @@ public:
   void render(Renderer& renderer, int bar_width, int bar_height);
 
   /**
+   * Wait for all script widgets to have initial output
+   * Used in screenshot mode to ensure widgets are populated
+   * @param timeout_ms Maximum time to wait (default 2000ms)
+   * @return true if all widgets ready, false on timeout
+   */
+  bool wait_for_ready(int timeout_ms = 2000);
+
+  /**
    * Handle pointer click
    * @param x Click X position
    * @param y Click Y position

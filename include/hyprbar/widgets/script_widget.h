@@ -44,6 +44,11 @@ public:
    */
   void measure_width(Renderer& renderer);
 
+  /**
+   * Check if widget has produced output yet
+   */
+  bool has_output() const;
+
 private:
   void worker_thread();
   std::string execute_command();
