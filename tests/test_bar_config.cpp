@@ -32,7 +32,7 @@ void test_bar_size_config() {
   // Verify bar configuration
   test::assert(config.bar.height == 40, "Bar height is 40");
   test::assert(config.bar.background == "#1e1e2e", "Bar background");
-  test::assert(config.bar.foreground == "#89b4fa", "Bar foreground");
+  test::assert(config.bar.color == "#89b4fa", "Bar color");
   test::assert(config.bar.font == "Noto Sans, Noto Color Emoji", "Bar font");
   test::assert(std::fabs(config.bar.size - 16.0) < 0.001, "Bar size is 16");
 }
@@ -84,7 +84,7 @@ void test_widget_inheritance_structure() {
   // Verify bar defaults
   test::assert(config.bar.font == "Noto Sans", "Bar font");
   test::assert(std::fabs(config.bar.size - 14.0) < 0.001, "Bar size is 14");
-  test::assert(config.bar.foreground == "#cdd6f4", "Bar foreground");
+  test::assert(config.bar.color == "#cdd6f4", "Bar color");
 
   // Verify widgets loaded
   test::assert(config.widgets.size() == 2, "Two widgets loaded");

@@ -71,7 +71,7 @@ void test_default_config() {
   Config cfg;
   test::assert(cfg.bar.height == 30, "Default bar height");
   test::assert(cfg.bar.background == "#1e1e2e", "Default background");
-  test::assert(cfg.bar.foreground == "#cdd6f4", "Default foreground");
+  test::assert(cfg.bar.color == "#cdd6f4", "Default color");
 }
 
 void run_config_tests() {

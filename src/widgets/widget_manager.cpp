@@ -49,7 +49,7 @@ bool WidgetManager::initialize(const ConfigManager& config_mgr) {
         obj["size"] = ConfigValue(default_font_size);
       }
       if (!obj.count("color")) {
-        obj["color"] = ConfigValue(config.bar.foreground);
+        obj["color"] = ConfigValue(config.bar.color);
       }
     }
 

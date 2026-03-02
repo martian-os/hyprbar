@@ -114,7 +114,7 @@ struct BarConfig {
   Position position = Position::Top;
   uint32_t height = 30;
   std::string background = "#1e1e2e";
-  std::string foreground = "#cdd6f4";
+  std::string color = "#cdd6f4"; // Renamed from 'foreground' for consistency
   std::string font = "monospace";
   double size = 14.0;
 };

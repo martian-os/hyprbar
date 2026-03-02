@@ -87,7 +87,7 @@ Widgets **inherit** font, size, and color from bar defaults. Override only when 
 {
   "bar": {
     "background": "#1e1e2ecc",
-    "foreground": "#cdd6f4",
+    "color": "#cdd6f4",
     "font": "Noto Sans, Noto Color Emoji",
     "size": 14
   },
@@ -133,7 +133,7 @@ Widgets **inherit** font, size, and color from bar defaults. Override only when 
     "position": "top",
     "height": 30,
     "background": "#1e1e2ecc",
-    "foreground": "#cdd6f4",
+    "color": "#cdd6f4",
     "font": "Noto Sans, Noto Color Emoji",
     "size": 14
   },
@@ -307,7 +307,7 @@ Widgets inherit styling from the bar unless explicitly overridden:
   "bar": {
     "font": "Noto Sans",
     "size": 14,
-    "foreground": "#cdd6f4"
+    "color": "#cdd6f4"
   },
   "widgets": [
     {
