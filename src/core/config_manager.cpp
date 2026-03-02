@@ -246,6 +246,14 @@ bool ConfigManager::load(const std::string& path) {
     return false;
   }
 
+  // Store config directory for relative path resolution
+  size_t last_slash = path.find_last_of('/');
+  if (last_slash != std::string::npos) {
+    config_dir_ = path.substr(0, last_slash);
+  } else {
+    config_dir_ = ".";
+  }
+
   std::stringstream buffer;
   buffer << file.rdbuf();
   return load_from_string(buffer.str());
@@ -372,6 +380,38 @@ ConfigManager::parse_widget_position(const std::string& pos) {
     return WidgetConfig::Position::Right;
 
   return WidgetConfig::Position::Left; // default
+}
+
+std::string ConfigManager::resolve_path(const std::string& path) const {
+  if (path.empty()) {
+    return path;
+  }
+
+  // Absolute path - return as-is
+  if (path[0] == '/') {
+    return path;
+  }
+
+  // Home directory expansion
+  if (path[0] == '~') {
+    const char* home = getenv("HOME");
+    if (!home) {
+      return path;
+    }
+    if (path.length() == 1) {
+      return std::string(home);
+    }
+    if (path[1] == '/') {
+      return std::string(home) + path.substr(1);
+    }
+    return path; // ~user syntax not supported
+  }
+
+  // Relative path - resolve relative to config directory
+  if (config_dir_.empty() || config_dir_ == ".") {
+    return path;
+  }
+  return config_dir_ + "/" + path;
 }
 
 } // namespace hyprbar

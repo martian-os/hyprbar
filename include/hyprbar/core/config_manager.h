@@ -177,6 +177,21 @@ public:
    */
   static std::string get_default_config_path();
 
+  /**
+   * Get config directory (where config file was loaded from)
+   */
+  const std::string& get_config_dir() const {
+    return config_dir_;
+  }
+
+  /**
+   * Resolve path relative to config directory
+   * If path is absolute, returns it unchanged
+   * If path starts with ~, expands home directory
+   * Otherwise resolves relative to config file directory
+   */
+  std::string resolve_path(const std::string& path) const;
+
 private:
   bool parse_json(const std::string& json);
   bool parse_bar_config(const ConfigValue& value);
@@ -187,6 +202,7 @@ private:
 
   Config config_;
   std::string error_;
+  std::string config_dir_;  // Directory containing config file
 };
 
 } // namespace hyprbar

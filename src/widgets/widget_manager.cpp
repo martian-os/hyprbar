@@ -28,7 +28,20 @@ bool WidgetManager::initialize(const ConfigManager& config_mgr) {
     if (!widget) {
       continue;
     }
-    if (!widget->initialize(widget_config.config)) {
+
+    // For script widgets, resolve command path relative to config
+    ConfigValue resolved_config = widget_config.config;
+    if (widget_config.type == "script" &&
+        resolved_config.type == ConfigValue::Type::Object) {
+      auto& obj = resolved_config.object_value;
+      if (obj.count("command")) {
+        std::string command = obj.at("command").string_value;
+        std::string resolved = config_mgr.resolve_path(command);
+        obj["command"] = ConfigValue(resolved);
+      }
+    }
+
+    if (!widget->initialize(resolved_config)) {
       Logger::instance().error("Failed to initialize {} widget",
                                widget_config.type);
       continue;

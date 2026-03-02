@@ -83,6 +83,8 @@ cp examples/config-minimal.json ~/.config/hyprbar/config.json
 cp examples/config-full.json ~/.config/hyprbar/config.json
 ```
 
+**Note:** Widget paths in config files are resolved relative to the config file location. The example configs use `widgets/date.sh` which resolves to `~/.config/hyprbar/widgets/date.sh` when the config is at `~/.config/hyprbar/config.json`.
+
 ## Creating Custom Widgets
 
 Script widgets execute a command and display the last line of stdout. This makes it easy to create custom widgets in any language.
@@ -94,7 +96,7 @@ Script widgets execute a command and display the last line of stdout. This makes
   "type": "script",
   "position": "left",
   "config": {
-    "command": "/path/to/script.sh",
+    "command": "widgets/my-script.sh",
     "interval": 1000,
     "font": "monospace",
     "size": 14,
@@ -104,6 +106,9 @@ Script widgets execute a command and display the last line of stdout. This makes
 ```
 
 - **command**: Script to execute (required)
+  - Relative paths are resolved relative to the config file directory
+  - Absolute paths (`/path/to/script`) work as-is
+  - Tilde expansion (`~/script.sh`) is supported
 - **interval**: Update interval in milliseconds (default: 1000)
 - **font**: Font name (default: "monospace")
 - **size**: Font size in points (default: 14)
@@ -120,7 +125,7 @@ random_index=$((RANDOM % ${#emojis[@]}))
 echo "${emojis[$random_index]}"
 ```
 
-Make it executable and add to config:
+Make it executable and add to config (relative path):
 ```bash
 chmod +x ~/.config/hyprbar/widgets/custom-widget.sh
 ```
@@ -130,7 +135,7 @@ chmod +x ~/.config/hyprbar/widgets/custom-widget.sh
   "type": "script",
   "position": "center",
   "config": {
-    "command": "~/.config/hyprbar/widgets/custom-widget.sh",
+    "command": "widgets/custom-widget.sh",
     "interval": 5000,
     "size": 20
   }
