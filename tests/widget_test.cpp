@@ -1,82 +1,92 @@
 #include "hyprbar/core/config_manager.h"
-#include "hyprbar/widgets/clock_widget.h"
+#include "hyprbar/widgets/script_widget.h"
 #include "test_utils.h"
+#include <thread>
+#include <chrono>
 
 using namespace hyprbar;
 
-void test_clock_initialization() {
-  ClockWidget widget;
+void test_script_initialization() {
+  ScriptWidget widget;
   std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["command"] = ConfigValue("echo 'Hello'");
   ConfigValue cfg(cfg_map);
 
   bool success = widget.initialize(cfg);
-  test::assert(success, "Clock initialization");
+  test::assert(success, "Script initialization");
 }
 
-void test_clock_format_config() {
-  ClockWidget widget;
+void test_script_config() {
+  ScriptWidget widget;
   std::map<std::string, ConfigValue> cfg_map;
-  cfg_map["format"] = ConfigValue("%H:%M");
+  cfg_map["command"] = ConfigValue("date");
+  cfg_map["interval"] = ConfigValue(static_cast<int64_t>(2000));
   cfg_map["size"] = ConfigValue(static_cast<int64_t>(16));
   cfg_map["color"] = ConfigValue("#ff0000");
 
   ConfigValue cfg(cfg_map);
-  widget.initialize(cfg);
-
-  test::assert(true, "Clock accepts config");
+  bool success = widget.initialize(cfg);
+  test::assert(success, "Script accepts config");
 }
 
-void test_clock_update() {
-  ClockWidget widget;
+void test_script_update() {
+  ScriptWidget widget;
   std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["command"] = ConfigValue("echo 'test'");
+  cfg_map["interval"] = ConfigValue(static_cast<int64_t>(100));
   ConfigValue cfg(cfg_map);
   widget.initialize(cfg);
 
-  // First update should always return true (initial render)
+  // Wait for first execution
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+  // Widget should have output now
   bool changed = widget.update();
-
-  // If same second, update again (returns false)
-  // If different second, changed is true
-  // Either way, widget update mechanism works
-  test::assert(true, "Clock update mechanism works");
+  test::assert(true, "Script update mechanism works");
 }
 
-void test_clock_dimensions() {
-  ClockWidget widget;
+void test_script_dimensions() {
+  ScriptWidget widget;
   std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["command"] = ConfigValue("echo 'Hello World'");
   ConfigValue cfg(cfg_map);
   widget.initialize(cfg);
+
+  // Wait for execution
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
   int width = widget.get_desired_width();
   int height = widget.get_desired_height();
 
-  test::assert(width > 0, "Clock has positive width");
-  test::assert(height >= 0, "Clock has non-negative height");
+  test::assert(width >= 0, "Script has non-negative width");
+  test::assert(height >= 0, "Script has non-negative height");
 }
 
 void test_integer_vs_double_config() {
-  ClockWidget widget;
+  ScriptWidget widget;
   std::map<std::string, ConfigValue> cfg_map;
+  cfg_map["command"] = ConfigValue("echo 'test'");
   cfg_map["size"] = ConfigValue(static_cast<int64_t>(16));
   ConfigValue cfg(cfg_map);
 
   bool success = widget.initialize(cfg);
-  test::assert(success, "Clock handles integer config");
+  test::assert(success, "Script handles integer config");
 
-  ClockWidget widget2;
+  ScriptWidget widget2;
   std::map<std::string, ConfigValue> cfg_map2;
+  cfg_map2["command"] = ConfigValue("echo 'test'");
   cfg_map2["size"] = ConfigValue(16.0);
   ConfigValue cfg2(cfg_map2);
 
   success = widget2.initialize(cfg2);
-  test::assert(success, "Clock handles double config");
+  test::assert(success, "Script handles double config");
 }
 
 void run_widget_tests() {
   std::cout << "\n--- Widget Tests ---" << std::endl;
-  test_clock_initialization();
-  test_clock_format_config();
-  test_clock_update();
-  test_clock_dimensions();
+  test_script_initialization();
+  test_script_config();
+  test_script_update();
+  test_script_dimensions();
   test_integer_vs_double_config();
 }

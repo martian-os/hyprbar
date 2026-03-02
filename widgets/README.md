@@ -70,7 +70,7 @@ mkdir -p ~/.config/hyprbar/widgets
 
 2. Copy widget scripts:
 ```bash
-cp examples/widgets/*.sh ~/.config/hyprbar/widgets/
+cp widgets/*.sh ~/.config/hyprbar/widgets/
 chmod +x ~/.config/hyprbar/widgets/*.sh
 ```
 

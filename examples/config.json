@@ -8,12 +8,14 @@
   },
   "widgets": [
     {
-      "type": "clock",
+      "type": "script",
       "position": "left",
       "config": {
-        "format": "%H:%M:%S",
+        "command": "../widgets/date.sh",
+        "interval": 1000,
         "font": "monospace",
-        "size": 14
+        "size": 14,
+        "color": "#cdd6f4"
       }
     }
   ]

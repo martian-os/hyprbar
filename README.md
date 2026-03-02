@@ -47,9 +47,9 @@ cd hyprbar
 # Build
 make
 
-# Install example widgets and config
+# Install widgets and config
 mkdir -p ~/.config/hyprbar/widgets
-cp examples/widgets/*.sh ~/.config/hyprbar/widgets/
+cp widgets/*.sh ~/.config/hyprbar/widgets/
 chmod +x ~/.config/hyprbar/widgets/*.sh
 cp examples/config-minimal.json ~/.config/hyprbar/config.json
 
@@ -90,9 +90,10 @@ Specify custom config: `hyprbar --config /path/to/config.json`
       }
     },
     {
-      "type": "clock",
+      "type": "script",
       "config": {
-        "format": "%H:%M:%S",
+        "command": "widgets/date.sh",
+        "interval": 1000,
         "color": "#cdd6f4",
         "size": 14
       }
@@ -148,7 +149,7 @@ echo "CPU: ${usage}%"
 
 ### Pre-built Widgets
 
-Included in `examples/widgets/`:
+Included in `widgets/`:
 
 **System Info:**
 - `cpu.sh` - CPU usage percentage
@@ -168,7 +169,7 @@ Included in `examples/widgets/`:
 **Other:**
 - `updates.sh` - Available system updates (apt)
 
-See [examples/widgets/README.md](examples/widgets/README.md) for detailed widget documentation and how to create custom widgets.
+See [widgets/README.md](widgets/README.md) for detailed widget documentation and how to create custom widgets.
 
 ## Development
 
@@ -195,7 +196,8 @@ hyprbar/
 │   └── widgets/        # Widget system
 ├── include/hyprbar/    # Public headers
 ├── tests/              # Unit tests
-├── examples/           # Example widget scripts
+├── widgets/            # Widget script collection
+├── examples/           # Example configurations
 └── docs/               # Architecture & guides
 ```
 

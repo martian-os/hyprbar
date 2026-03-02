@@ -2,16 +2,11 @@
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/core/logger.h"
 #include "hyprbar/rendering/renderer.h"
-#include "hyprbar/widgets/clock_widget.h"
 #include "hyprbar/widgets/script_widget.h"
 
 namespace hyprbar {
 
 std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
-  if (type == "clock") {
-    return std::make_unique<ClockWidget>();
-  }
-
   if (type == "script") {
     return std::make_unique<ScriptWidget>();
   }

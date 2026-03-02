@@ -11,7 +11,7 @@
       "type": "script",
       "position": "left",
       "config": {
-        "command": "widgets/date.sh",
+        "command": "../widgets/date.sh",
         "interval": 1000,
         "font": "monospace",
         "size": 14,
@@ -22,7 +22,7 @@
       "type": "script",
       "position": "right",
       "config": {
-        "command": "widgets/cpu.sh",
+        "command": "../widgets/cpu.sh",
         "interval": 2000,
         "font": "monospace",
         "size": 12,
@@ -33,7 +33,7 @@
       "type": "script",
       "position": "right",
       "config": {
-        "command": "widgets/memory.sh",
+        "command": "../widgets/memory.sh",
         "interval": 5000,
         "font": "monospace",
         "size": 12,
