@@ -145,3 +145,34 @@ lint:
 		grep -E "(error:|warning:.*function.*too long|warning:.*file.*too long)" || true; \
 	done
 	@echo "Lint complete"
+
+# Code coverage
+.PHONY: coverage coverage-report coverage-clean
+
+coverage: CXXFLAGS += --coverage -O0 -g
+coverage: LDFLAGS += --coverage  
+coverage: clean dirs
+	@echo "Building with coverage instrumentation..."
+	@$(MAKE) test CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)"
+	@echo "Running tests..."
+	@$(TEST_TARGET)
+	@echo "Generating coverage report..."
+	@mkdir -p coverage
+	@geninfo build --output-file coverage/coverage.info --rc branch_coverage=1 --ignore-errors mismatch,inconsistent 2>/dev/null || true
+	@lcov --remove coverage/coverage.info '/usr/*' '*/tests/*' --output-file coverage/coverage.info --ignore-errors inconsistent 2>/dev/null || true
+	@echo ""
+	@echo "Coverage Report"
+	@echo "==============="
+	@lcov --summary coverage/coverage.info --ignore-errors inconsistent 2>&1 | grep -A 3 "Summary"
+	@echo ""
+	@echo "For detailed report: make coverage-report"
+
+coverage-report: coverage
+	@echo "Generating HTML coverage report..."
+	@genhtml coverage/coverage.info --output-directory coverage/html --rc branch_coverage=1 --ignore-errors inconsistent 2>/dev/null
+	@echo "Coverage report: coverage/html/index.html"
+
+coverage-clean:
+	@rm -rf coverage
+	@find $(BUILD_DIR) -name '*.gcda' -o -name '*.gcno' -delete 2>/dev/null || true
+	@echo "Coverage data cleaned"

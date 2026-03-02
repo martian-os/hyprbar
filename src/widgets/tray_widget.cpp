@@ -111,8 +111,14 @@ void TrayWidget::fetch_tray_items() {
 
   std::lock_guard<std::mutex> lock(icons_mutex_);
 
-  // Placeholder: empty tray until D-Bus is implemented
+  // Placeholder: Add 3 fake icons for demonstration
   icons_.clear();
+  for (int i = 0; i < 3; ++i) {
+    TrayIcon icon;
+    icon.service = "demo.app." + std::to_string(i);
+    icon.title = "Demo Icon " + std::to_string(i);
+    icons_.push_back(icon);
+  }
 }
 
 void TrayWidget::fetch_icon_data(TrayIcon& icon) {
