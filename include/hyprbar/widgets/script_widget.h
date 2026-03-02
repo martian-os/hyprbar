@@ -1,8 +1,11 @@
 #pragma once
 
 #include "widget.h"
+#include <atomic>
 #include <chrono>
+#include <mutex>
 #include <string>
+#include <thread>
 
 namespace hyprbar {
 
@@ -16,14 +19,16 @@ namespace hyprbar {
  * - size: Font size (default: 14)
  * - color: Text color hex (default: "#ffffff")
  *
- * The widget executes the command periodically and displays
- * the last line of stdout. This allows users to write widgets
+ * The widget executes the command periodically in a background thread
+ * and displays the last line of stdout. This allows users to write widgets
  * in any language (bash, ruby, go, python, etc.)
+ *
+ * Thread-safe: Commands run in background, output is synchronized.
  */
 class ScriptWidget : public Widget {
 public:
-  ScriptWidget() = default;
-  ~ScriptWidget() override = default;
+  ScriptWidget();
+  ~ScriptWidget() override;
 
   bool initialize(const ConfigValue& config) override;
   bool update() override;
@@ -35,6 +40,7 @@ public:
   }
 
 private:
+  void worker_thread();
   std::string execute_command();
 
   std::string command_;
@@ -42,8 +48,13 @@ private:
   std::string font_{"monospace"};
   double font_size_{14.0};
   std::string color_{"#000000"}; // Black default
+
+  // Thread-safe state
+  mutable std::mutex output_mutex_;
   std::string last_output_;
-  std::chrono::steady_clock::time_point last_update_;
+  std::atomic<bool> output_changed_{false};
+  std::atomic<bool> running_{false};
+  std::thread worker_;
 };
 
 } // namespace hyprbar

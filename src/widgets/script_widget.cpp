@@ -5,8 +5,19 @@
 #include <array>
 #include <cstdio>
 #include <memory>
+#include <thread>
 
 namespace hyprbar {
+
+ScriptWidget::ScriptWidget() : running_(false), output_changed_(false) {
+}
+
+ScriptWidget::~ScriptWidget() {
+  running_ = false;
+  if (worker_.joinable()) {
+    worker_.join();
+  }
+}
 
 bool ScriptWidget::initialize(const ConfigValue& config) {
   if (config.type != ConfigValue::Type::Object) {
@@ -49,12 +60,40 @@ bool ScriptWidget::initialize(const ConfigValue& config) {
     color_ = obj.at("color").string_value;
   }
 
-  // Set last_update to epoch so first update() will trigger immediately
-  last_update_ = std::chrono::steady_clock::time_point();
-  last_output_ = "";
+  // Start background worker thread
+  running_ = true;
+  worker_ = std::thread(&ScriptWidget::worker_thread, this);
 
   Logger::instance().debug("Script widget initialized: {}", command_);
   return true;
+}
+
+void ScriptWidget::worker_thread() {
+  Logger::instance().debug("Worker thread started for: {}", command_);
+
+  while (running_) {
+    std::string new_output = execute_command();
+
+    {
+      std::lock_guard<std::mutex> lock(output_mutex_);
+      if (new_output != last_output_) {
+        last_output_ = new_output;
+        output_changed_ = true;
+        Logger::instance().debug("Widget output updated: {} -> '{}'", command_,
+                                 new_output);
+      }
+    }
+
+    // Sleep for interval (check running_ periodically for responsive shutdown)
+    int sleep_ms = interval_ms_;
+    while (running_ && sleep_ms > 0) {
+      int chunk = std::min(sleep_ms, 100);
+      std::this_thread::sleep_for(std::chrono::milliseconds(chunk));
+      sleep_ms -= chunk;
+    }
+  }
+
+  Logger::instance().debug("Worker thread stopped for: {}", command_);
 }
 
 std::string ScriptWidget::execute_command() {
@@ -85,31 +124,21 @@ std::string ScriptWidget::execute_command() {
 }
 
 bool ScriptWidget::update() {
-  auto now = std::chrono::steady_clock::now();
-  auto elapsed =
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - last_update_);
-
-  if (elapsed.count() >= interval_ms_) {
-    std::string new_output = execute_command();
-    last_update_ = now;
-
-    if (new_output != last_output_) {
-      last_output_ = new_output;
-      return true; // Needs redraw
-    }
-  }
-
-  return false;
+  // Check if output changed (set by worker thread)
+  bool changed = output_changed_.exchange(false);
+  return changed;
 }
 
 void ScriptWidget::render(Renderer& renderer, int x, int y, int /*width*/,
                           int height) {
+  std::lock_guard<std::mutex> lock(output_mutex_);
   Color fg = Color::from_hex(color_);
   double text_y = y + (height / 2.0) + (font_size_ / 3.0);
   renderer.draw_text(last_output_, x, text_y, font_, font_size_, fg);
 }
 
 int ScriptWidget::get_desired_width() const {
+  std::lock_guard<std::mutex> lock(output_mutex_);
   // Estimate: ~8 pixels per character
   return static_cast<int>(last_output_.length() * 8 + 20);
 }
