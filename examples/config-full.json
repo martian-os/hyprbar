@@ -29,15 +29,6 @@
     },
     {
       "type": "script",
-      "position": "center",
-      "config": {
-        "command": "../widgets/weather.sh",
-        "interval": 300000,
-        "color": "#f9e2af"
-      }
-    },
-    {
-      "type": "script",
       "position": "right",
       "config": {
         "command": "../widgets/cpu.sh",

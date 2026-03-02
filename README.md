@@ -209,9 +209,8 @@ Included in `widgets/`:
 - `network.sh` - Active network interface and IP/WiFi info
 - `volume.sh` - Audio volume and mute status
 
-**Time & Weather:**
+**Time:**
 - `date.sh` - Custom date/time formatting
-- `weather.sh` - Current weather (uses wttr.in)
 
 **Other:**
 - `updates.sh` - Available system updates (apt)

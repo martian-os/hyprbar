@@ -50,12 +50,6 @@ This directory contains example shell script widgets for hyprbar. Script widgets
 
 ### Other
 
-- **weather.sh** - Shows current weather
-  - Updates: Every 5 minutes (cached for 30 minutes)
-  - Format: `⛅ +12°C`
-  - Requires: `curl`
-  - Environment: Set `HYPRBAR_LOCATION=YourCity` to customize location
-
 - **updates.sh** - Shows available system updates
   - Updates: Every hour (cached)
   - Format: `📦 15 updates` or `✓ Up to date`
@@ -193,6 +187,5 @@ The example configs use Catppuccin Mocha colors:
 - `#74c7ec` - Sapphire (network)
 - `#cba6f7` - Mauve (battery)
 - `#94e2d5` - Teal (uptime)
-- `#f9e2af` - Yellow (weather)
 
 Customize colors in your config as needed!
