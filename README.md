@@ -286,3 +286,55 @@ Uses:
 - [wlr-protocols](https://gitlab.freedesktop.org/wlroots/wlr-protocols) - Layer shell
 - [Cairo](https://www.cairographics.org/) - 2D graphics
 - [Pango](https://pango.gnome.org/) - Text rendering
+
+## CSS-like Styling
+
+Hyprbar uses a CSS-like inheritance model for styling widgets:
+
+### Style Properties
+
+Three properties can be styled:
+- `font` - Font family (e.g., "Noto Sans", "monospace")
+- `size` - Font size in points (e.g., 14.0)
+- `color` - Text color as hex (e.g., "#cdd6f4")
+
+### Inheritance
+
+Widgets inherit styling from the bar unless explicitly overridden:
+
+```json
+{
+  "bar": {
+    "font": "Noto Sans",
+    "size": 14,
+    "foreground": "#cdd6f4"
+  },
+  "widgets": [
+    {
+      "type": "script",
+      "config": {
+        "command": "date"
+        // Inherits: font="Noto Sans", size=14, color="#cdd6f4"
+      }
+    },
+    {
+      "type": "script",
+      "config": {
+        "command": "cpu.sh",
+        "size": 12,
+        "color": "#ff0000"
+        // Inherits: font="Noto Sans"
+        // Overrides: size=12, color="#ff0000"
+      }
+    }
+  ]
+}
+```
+
+### Attribute Names
+
+**Important:** Use consistent names across bar and widgets:
+- ✅ Bar: `foreground` → Widget: `color` (unified as `color` internally)
+- ✅ Bar: `font` → Widget: `font`
+- ✅ Bar: `size` → Widget: `size`
+

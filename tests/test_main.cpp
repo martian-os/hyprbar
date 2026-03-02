@@ -7,6 +7,7 @@ void run_config_tests();
 void run_renderer_tests();
 void run_widget_tests();
 void run_bar_config_tests();
+void run_style_tests();
 
 int main() {
   std::cout << "\n========================================" << std::endl;
@@ -20,6 +21,7 @@ int main() {
   run_renderer_tests();
   run_widget_tests();
   run_bar_config_tests();
+  run_style_tests();
 
   std::cout << "\n========================================" << std::endl;
   std::cout << "Tests passed: " << test::get_passed() << std::endl;
