@@ -55,8 +55,9 @@ void render_frame(void* wayland_buffer) {
   }
 }
 
-int run_screenshot_mode(const std::string& output_path, const Config& config) {
+int run_screenshot_mode(const std::string& output_path, ConfigManager& config_mgr) {
   Logger::instance().info("Screenshot mode: {}", output_path);
+  const Config& config = config_mgr.get_config();
 
   // Initialize renderer
   app.renderer = std::make_unique<Renderer>();
@@ -66,8 +67,6 @@ int run_screenshot_mode(const std::string& output_path, const Config& config) {
   }
 
   // Initialize widgets
-  ConfigManager config_mgr;
-  config_mgr.load(ConfigManager::get_default_config_path());
   app.widget_manager = std::make_unique<WidgetManager>();
   app.widget_manager->initialize(config_mgr);
   app.widget_manager->update();
@@ -83,8 +82,9 @@ int run_screenshot_mode(const std::string& output_path, const Config& config) {
   return 0;
 }
 
-int run_wayland_mode(const Config& config) {
+int run_wayland_mode(ConfigManager& config_mgr) {
   Logger::instance().info("Wayland mode starting...");
+  const Config& config = config_mgr.get_config();
 
   app.wayland = std::make_unique<WaylandManager>();
   if (!app.wayland->initialize()) {
@@ -132,8 +132,6 @@ int run_wayland_mode(const Config& config) {
   }
 
   // Initialize widgets
-  ConfigManager config_mgr;
-  config_mgr.load(ConfigManager::get_default_config_path());
   app.widget_manager = std::make_unique<WidgetManager>();
   app.widget_manager->initialize(config_mgr);
 
@@ -177,10 +175,12 @@ int run_wayland_mode(const Config& config) {
 void print_usage(const char* program) {
   std::cout << "Usage: " << program << " [OPTIONS]\n\n"
             << "Options:\n"
+            << "  --config <path>       Path to configuration file (JSON)\n"
             << "  --screenshot <path>   Generate screenshot to file (no "
                "compositor needed)\n"
             << "  --help                Show this help\n\n"
-            << "Without options, runs in normal Wayland mode.\n";
+            << "Without options, runs in normal Wayland mode with default config.\n"
+            << "Default config location: ~/.config/hyprbar/config.json\n";
 }
 
 int main(int argc, char** argv) {
@@ -192,9 +192,12 @@ int main(int argc, char** argv) {
 
   // Parse arguments
   std::string screenshot_path;
+  std::string config_path;
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
-    if (arg == "--screenshot" && i + 1 < argc) {
+    if (arg == "--config" && i + 1 < argc) {
+      config_path = argv[++i];
+    } else if (arg == "--screenshot" && i + 1 < argc) {
       screenshot_path = argv[++i];
     } else if (arg == "--help") {
       print_usage(argv[0]);
@@ -208,17 +211,21 @@ int main(int argc, char** argv) {
 
   // Load config
   ConfigManager config_mgr;
-  std::string config_path = ConfigManager::get_default_config_path();
+  if (config_path.empty()) {
+    config_path = ConfigManager::get_default_config_path();
+  }
   if (!config_mgr.load(config_path)) {
     Logger::instance().warn("Could not load config from {}, using defaults",
                             config_path);
+  } else {
+    Logger::instance().info("Loaded configuration from {}", config_path);
   }
   app.config = config_mgr.get_config();
 
   // Run in appropriate mode
   if (!screenshot_path.empty()) {
-    return run_screenshot_mode(screenshot_path, app.config);
+    return run_screenshot_mode(screenshot_path, config_mgr);
   } else {
-    return run_wayland_mode(app.config);
+    return run_wayland_mode(config_mgr);
   }
 }

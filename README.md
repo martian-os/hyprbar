@@ -47,8 +47,17 @@ cd hyprbar
 # Build
 make
 
+# Install example widgets and config
+mkdir -p ~/.config/hyprbar/widgets
+cp examples/widgets/*.sh ~/.config/hyprbar/widgets/
+chmod +x ~/.config/hyprbar/widgets/*.sh
+cp examples/config-minimal.json ~/.config/hyprbar/config.json
+
 # Run (on Hyprland/Sway/River)
 ./bin/hyprbar
+
+# Run with custom config
+./bin/hyprbar --config /path/to/config.json
 
 # Test without compositor (screenshot mode)
 ./bin/hyprbar --screenshot output.png
@@ -56,7 +65,11 @@ make
 
 ## Configuration
 
-Config file: `~/.config/hyprbar/config.json`
+Default config location: `~/.config/hyprbar/config.json`
+
+Specify custom config: `hyprbar --config /path/to/config.json`
+
+### Example Configuration
 
 ```json
 {
@@ -114,14 +127,29 @@ echo "$idle $total" > /tmp/hyprbar_cpu_prev
 echo "CPU: ${usage}%"
 ```
 
-More examples in `examples/widgets/`:
-- `cpu.sh` - CPU usage
-- `memory.sh` - RAM usage
-- `battery.sh` - Battery status
-- `date.sh` - Custom date formatting
+### Pre-built Widgets
+
+Included in `examples/widgets/`:
+
+**System Info:**
+- `cpu.sh` - CPU usage percentage
+- `memory.sh` - RAM usage (used/total)
+- `disk.sh` - Disk usage for root partition
+- `battery.sh` - Battery level and charging status
 - `uptime.sh` - System uptime
 
-See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full widget documentation.
+**Network & Media:**
+- `network.sh` - Active network interface and IP/WiFi info
+- `volume.sh` - Audio volume and mute status
+
+**Time & Weather:**
+- `date.sh` - Custom date/time formatting
+- `weather.sh` - Current weather (uses wttr.in)
+
+**Other:**
+- `updates.sh` - Available system updates (apt)
+
+See [examples/widgets/README.md](examples/widgets/README.md) for detailed widget documentation and how to create custom widgets.
 
 ## Development
 

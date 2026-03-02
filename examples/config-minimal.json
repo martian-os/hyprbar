@@ -1,0 +1,44 @@
+{
+  "bar": {
+    "position": "top",
+    "height": 30,
+    "background": "#1e1e2e",
+    "foreground": "#cdd6f4",
+    "font": "monospace"
+  },
+  "widgets": [
+    {
+      "type": "script",
+      "position": "left",
+      "config": {
+        "command": "~/.config/hyprbar/widgets/date.sh",
+        "interval": 1000,
+        "font": "monospace",
+        "size": 14,
+        "color": "#89b4fa"
+      }
+    },
+    {
+      "type": "script",
+      "position": "right",
+      "config": {
+        "command": "~/.config/hyprbar/widgets/cpu.sh",
+        "interval": 2000,
+        "font": "monospace",
+        "size": 12,
+        "color": "#f38ba8"
+      }
+    },
+    {
+      "type": "script",
+      "position": "right",
+      "config": {
+        "command": "~/.config/hyprbar/widgets/memory.sh",
+        "interval": 5000,
+        "font": "monospace",
+        "size": 12,
+        "color": "#fab387"
+      }
+    }
+  ]
+}
