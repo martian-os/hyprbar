@@ -55,7 +55,8 @@ void render_frame(void* wayland_buffer) {
   }
 }
 
-int run_screenshot_mode(const std::string& output_path, ConfigManager& config_mgr) {
+int run_screenshot_mode(const std::string& output_path,
+                        ConfigManager& config_mgr) {
   Logger::instance().info("Screenshot mode: {}", output_path);
   const Config& config = config_mgr.get_config();
 
@@ -173,14 +174,15 @@ int run_wayland_mode(ConfigManager& config_mgr) {
 }
 
 void print_usage(const char* program) {
-  std::cout << "Usage: " << program << " [OPTIONS]\n\n"
-            << "Options:\n"
-            << "  --config <path>       Path to configuration file (JSON)\n"
-            << "  --screenshot <path>   Generate screenshot to file (no "
-               "compositor needed)\n"
-            << "  --help                Show this help\n\n"
-            << "Without options, runs in normal Wayland mode with default config.\n"
-            << "Default config location: ~/.config/hyprbar/config.json\n";
+  std::cout
+      << "Usage: " << program << " [OPTIONS]\n\n"
+      << "Options:\n"
+      << "  --config <path>       Path to configuration file (JSON)\n"
+      << "  --screenshot <path>   Generate screenshot to file (no "
+         "compositor needed)\n"
+      << "  --help                Show this help\n\n"
+      << "Without options, runs in normal Wayland mode with default config.\n"
+      << "Default config location: ~/.config/hyprbar/config.json\n";
 }
 
 int main(int argc, char** argv) {
