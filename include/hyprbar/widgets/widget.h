@@ -8,7 +8,7 @@ namespace hyprbar {
 
 // Forward declarations
 class Renderer;
-class ConfigValue;
+struct ConfigValue; // Changed from class to struct to match definition
 
 /**
  * Widget - Base interface for all bar widgets

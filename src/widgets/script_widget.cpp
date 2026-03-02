@@ -9,7 +9,7 @@
 
 namespace hyprbar {
 
-ScriptWidget::ScriptWidget() : running_(false), output_changed_(false) {
+ScriptWidget::ScriptWidget() : output_changed_(false), running_(false) {
 }
 
 ScriptWidget::~ScriptWidget() {

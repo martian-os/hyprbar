@@ -125,13 +125,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
     }
   }
 
-  // Calculate total widths
-  int left_total = 0;
-  for (auto* slot : left_widgets) {
-    left_total += slot->widget->get_desired_width() + spacing;
-  }
-  if (!left_widgets.empty())
-    left_total -= spacing; // Remove last spacing
+  // Calculate total widths for center and right positioning
+  // (left widgets don't need total, positioned incrementally)
 
   int center_total = 0;
   for (auto* slot : center_widgets) {

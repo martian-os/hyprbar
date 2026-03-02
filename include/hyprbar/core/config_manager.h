@@ -24,34 +24,37 @@ struct ConfigValue {
   std::vector<ConfigValue> array_value;
 
   ConfigValue()
-      : type(Type::String), int_value(0), double_value(0.0), bool_value(false) {
+      : type(Type::String), string_value(), int_value(0), double_value(0.0),
+        bool_value(false), object_value(), array_value() {
   }
 
   explicit ConfigValue(const std::string& s)
       : type(Type::String), string_value(s), int_value(0), double_value(0.0),
-        bool_value(false) {
+        bool_value(false), object_value(), array_value() {
   }
   explicit ConfigValue(const char* s)
       : type(Type::String), string_value(s), int_value(0), double_value(0.0),
-        bool_value(false) {
+        bool_value(false), object_value(), array_value() {
   }
   explicit ConfigValue(int64_t i)
-      : type(Type::Integer), int_value(i), double_value(0.0),
-        bool_value(false) {
+      : type(Type::Integer), string_value(), int_value(i), double_value(0.0),
+        bool_value(false), object_value(), array_value() {
   }
   explicit ConfigValue(double d)
-      : type(Type::Double), double_value(d), int_value(0), bool_value(false) {
+      : type(Type::Double), string_value(), int_value(0), double_value(d),
+        bool_value(false), object_value(), array_value() {
   }
   explicit ConfigValue(bool b)
-      : type(Type::Boolean), bool_value(b), int_value(0), double_value(0.0) {
+      : type(Type::Boolean), string_value(), int_value(0), double_value(0.0),
+        bool_value(b), object_value(), array_value() {
   }
   explicit ConfigValue(const std::map<std::string, ConfigValue>& obj)
-      : type(Type::Object), object_value(obj), int_value(0), double_value(0.0),
-        bool_value(false) {
+      : type(Type::Object), string_value(), int_value(0), double_value(0.0),
+        bool_value(false), object_value(obj), array_value() {
   }
   explicit ConfigValue(const std::vector<ConfigValue>& arr)
-      : type(Type::Array), array_value(arr), int_value(0), double_value(0.0),
-        bool_value(false) {
+      : type(Type::Array), string_value(), int_value(0), double_value(0.0),
+        bool_value(false), object_value(), array_value(arr) {
   }
 
   bool is_string() const {

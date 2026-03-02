@@ -30,6 +30,8 @@ static const wl_pointer_listener pointer_listener = {
     WaylandManager::pointer_handle_axis_source,
     WaylandManager::pointer_handle_axis_stop,
     WaylandManager::pointer_handle_axis_discrete,
+    nullptr, // axis_value120 (Wayland 1.21+, optional)
+    nullptr, // axis_relative_direction (Wayland 1.22+, optional)
 };
 
 static const zwlr_layer_surface_v1_listener layer_surface_listener = {
@@ -285,7 +287,7 @@ void WaylandManager::attach_and_commit(wl_buffer* buffer) {
 void WaylandManager::registry_handle_global(void* data, wl_registry* registry,
                                             uint32_t name,
                                             const char* interface,
-                                            uint32_t version) {
+                                            uint32_t /*version*/) {
   auto* wm = static_cast<WaylandManager*>(data);
 
   if (strcmp(interface, wl_compositor_interface.name) == 0) {
