@@ -86,6 +86,13 @@ public:
   void draw_text(const std::string& text, double x, double y,
                  const std::string& font, double size, const Color& color);
 
+  /**
+   * Measure text width using Pango
+   * Returns the actual rendered width in pixels
+   */
+  int measure_text_width(const std::string& text, const std::string& font,
+                         double size) const;
+
 private:
   uint32_t width_;
   uint32_t height_;

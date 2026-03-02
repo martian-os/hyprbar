@@ -158,4 +158,33 @@ void Renderer::draw_text(const std::string& text, double x, double y,
   cairo_restore(cr_);
 }
 
+int Renderer::measure_text_width(const std::string& text,
+                                 const std::string& font, double size) const {
+  if (text.empty()) {
+    return 0;
+  }
+
+  // Create temporary Pango layout for measurement
+  PangoLayout* layout = pango_cairo_create_layout(cr_);
+
+  // Set font description
+  PangoFontDescription* desc = pango_font_description_new();
+  pango_font_description_set_family(desc, font.c_str());
+  pango_font_description_set_size(desc, size * PANGO_SCALE);
+  pango_layout_set_font_description(layout, desc);
+
+  // Set text
+  pango_layout_set_text(layout, text.c_str(), -1);
+
+  // Get actual pixel width
+  int width, height;
+  pango_layout_get_pixel_size(layout, &width, &height);
+
+  // Cleanup
+  pango_font_description_free(desc);
+  g_object_unref(layout);
+
+  return width;
+}
+
 } // namespace hyprbar

@@ -52,6 +52,7 @@ private:
   // Thread-safe state
   mutable std::mutex output_mutex_;
   std::string last_output_;
+  mutable int cached_width_{20}; // Cached measured width
   std::atomic<bool> output_changed_{false};
   std::atomic<bool> running_{false};
   std::thread worker_;
