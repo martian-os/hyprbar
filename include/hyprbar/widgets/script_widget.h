@@ -39,6 +39,11 @@ public:
     return "script";
   }
 
+  /**
+   * Measure and cache text width using renderer (call before layout)
+   */
+  void measure_width(Renderer& renderer);
+
 private:
   void worker_thread();
   std::string execute_command();

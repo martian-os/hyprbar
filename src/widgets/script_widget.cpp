@@ -133,19 +133,20 @@ void ScriptWidget::render(Renderer& renderer, int x, int y, int /*width*/,
                           int height) {
   std::lock_guard<std::mutex> lock(output_mutex_);
 
-  // Measure and cache actual text width (do this during render when we have
-  // renderer)
-  if (!last_output_.empty()) {
-    cached_width_ =
-        renderer.measure_text_width(last_output_, font_, font_size_) +
-        20; // Add padding
-  } else {
-    cached_width_ = 20;
-  }
-
   Color fg = Color::from_hex(color_);
   double text_y = y + (height / 2.0) + (font_size_ / 3.0);
   renderer.draw_text(last_output_, x, text_y, font_, font_size_, fg);
+}
+
+void ScriptWidget::measure_width(Renderer& renderer) {
+  std::lock_guard<std::mutex> lock(output_mutex_);
+
+  if (!last_output_.empty()) {
+    cached_width_ =
+        renderer.measure_text_width(last_output_, font_, font_size_) + 20;
+  } else {
+    cached_width_ = 20;
+  }
 }
 
 int ScriptWidget::get_desired_width() const {

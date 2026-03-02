@@ -125,6 +125,16 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
     }
   }
 
+  // Measure script widget widths before layout
+  for (auto& slot : widgets_) {
+    if (slot.widget->get_type() == "script") {
+      auto* script_widget = dynamic_cast<ScriptWidget*>(slot.widget.get());
+      if (script_widget) {
+        script_widget->measure_width(renderer);
+      }
+    }
+  }
+
   // Calculate total widths for center and right positioning
   // (left widgets don't need total, positioned incrementally)
 
