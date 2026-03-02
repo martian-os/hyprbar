@@ -97,14 +97,23 @@ release: clean all
 # Show help
 help:
 	@echo "Hyprbar Makefile targets:"
-	@echo "  all       - Build the project (default)"
-	@echo "  test      - Build and run tests"
-	@echo "  clean     - Remove build artifacts"
-	@echo "  debug     - Build with debug symbols"
-	@echo "  release   - Build optimized release version"
-	@echo "  install   - Install to /usr/local/bin"
-	@echo "  uninstall - Remove from /usr/local/bin"
-	@echo "  help      - Show this help message"
+	@echo "  all          - Build the project (default)"
+	@echo "  test         - Build and run unit tests"
+	@echo "  integration  - Run integration tests (all configs)"
+	@echo "  clean        - Remove build artifacts"
+	@echo "  debug        - Build with debug symbols"
+	@echo "  release      - Build optimized release version"
+	@echo "  install      - Install to /usr/local/bin"
+	@echo "  uninstall    - Remove from /usr/local/bin"
+	@echo "  format       - Auto-format all C++ files"
+	@echo "  format-check - Check code formatting"
+	@echo "  help         - Show this help message"
+
+# Integration tests (test all example configs)
+integration: all
+	@echo "Running integration tests..."
+	@./tests/integration_test.sh
+	@echo "Integration tests complete"
 
 format-check:
 	@echo "🔍 Checking code formatting..."

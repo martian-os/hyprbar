@@ -22,13 +22,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang libwayland-dev libcairo2-dev libpango1.0-dev make
+          sudo apt-get install -y clang libwayland-dev libcairo2-dev libpango1.0-dev make file
 
       - name: Build project
         run: make
 
-      - name: Run tests
+      - name: Run unit tests
         run: make test
+
+      - name: Run integration tests
+        run: make integration
 
       - name: Build release version
         run: make release
