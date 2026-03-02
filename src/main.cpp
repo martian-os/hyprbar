@@ -5,11 +5,13 @@
 #include "hyprbar/wayland/wayland_manager.h"
 #include "hyprbar/widgets/widget_manager.h"
 #include <cairo/cairo.h>
+#include <chrono>
 #include <csignal>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <sys/epoll.h>
+#include <thread>
 
 using namespace hyprbar;
 
@@ -71,6 +73,14 @@ int run_screenshot_mode(const std::string& output_path,
   // Initialize widgets
   app.widget_manager = std::make_unique<WidgetManager>();
   app.widget_manager->initialize(config_mgr);
+  app.widget_manager->update();
+
+  // Wait briefly for script widgets to execute first time
+  // Most scripts complete in < 100ms, but give 500ms for slower ones
+  Logger::instance().debug("Waiting for widgets to populate...");
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  // Update again after wait to pick up script output
   app.widget_manager->update();
 
   // Render one frame
