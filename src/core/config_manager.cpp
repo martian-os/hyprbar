@@ -305,12 +305,8 @@ bool ConfigManager::parse_bar_config(const ConfigValue& value) {
     config_.bar.background = bg->as_string();
   }
 
-  // Support both 'color' (new) and 'foreground' (legacy) for backward
-  // compatibility
   if (auto color = value.get("color")) {
     config_.bar.color = color->as_string();
-  } else if (auto fg = value.get("foreground")) {
-    config_.bar.color = fg->as_string();
   }
 
   if (auto font = value.get("font")) {

@@ -12,7 +12,7 @@ void test_bar_size_config() {
       "position": "top",
       "height": 40,
       "background": "#1e1e2e",
-      "foreground": "#89b4fa",
+      "color": "#89b4fa",
       "font": "Noto Sans, Noto Color Emoji",
       "size": 16
     },
@@ -44,7 +44,7 @@ void test_widget_inheritance_structure() {
       "position": "top",
       "height": 30,
       "background": "#1e1e2e",
-      "foreground": "#cdd6f4",
+      "color": "#cdd6f4",
       "font": "Noto Sans",
       "size": 14
     },
@@ -117,7 +117,7 @@ void test_size_as_double() {
       "position": "top",
       "height": 30,
       "background": "#1e1e2e",
-      "foreground": "#cdd6f4",
+      "color": "#cdd6f4",
       "font": "Noto Sans",
       "size": 14.5
     },
@@ -143,7 +143,7 @@ void test_missing_size_uses_default() {
       "position": "top",
       "height": 30,
       "background": "#1e1e2e",
-      "foreground": "#cdd6f4",
+      "color": "#cdd6f4",
       "font": "Noto Sans"
     },
     "widgets": []
