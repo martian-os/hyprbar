@@ -2,7 +2,9 @@
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/core/logger.h"
 #include "hyprbar/rendering/renderer.h"
+#include "hyprbar/widgets/hyprland_widget.h"
 #include "hyprbar/widgets/script_widget.h"
+#include "hyprbar/widgets/tray_widget.h"
 #include <chrono>
 #include <thread>
 
@@ -11,6 +13,12 @@ namespace hyprbar {
 std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
   if (type == "script") {
     return std::make_unique<ScriptWidget>();
+  }
+  if (type == "hyprland") {
+    return std::make_unique<HyprlandWidget>();
+  }
+  if (type == "tray") {
+    return std::make_unique<TrayWidget>();
   }
 
   Logger::instance().warn("Unknown widget type: {}", type);

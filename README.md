@@ -338,3 +338,75 @@ Widgets inherit styling from the bar unless explicitly overridden:
 - ✅ Bar: `font` → Widget: `font`
 - ✅ Bar: `size` → Widget: `size`
 
+
+## Widget Types
+
+### Script Widget
+Executes shell scripts and displays output.
+
+**Config:**
+```json
+{
+  "type": "script",
+  "config": {
+    "command": "path/to/script.sh",
+    "interval": 1000,
+    "font": "Noto Sans",
+    "size": 14,
+    "color": "#cdd6f4"
+  }
+}
+```
+
+### Hyprland Widget
+Shows Hyprland workspaces with visual indicators.
+
+**Features:**
+- Active workspace (highlighted)
+- Occupied workspaces (has windows)
+- Empty workspaces (dimmed)
+- Real-time updates via Hyprland IPC
+
+**Config:**
+```json
+{
+  "type": "hyprland",
+  "config": {
+    "max_workspaces": 10,
+    "active_color": "#89b4fa",
+    "occupied_color": "#cdd6f4",
+    "empty_color": "#45475a",
+    "font": "Noto Sans",
+    "size": 14
+  }
+}
+```
+
+**Requirements:**
+- Running under Hyprland compositor
+- `HYPRLAND_INSTANCE_SIGNATURE` environment variable set
+
+### Tray Widget  
+System tray for StatusNotifierItem (SNI) icons.
+
+**Features:**
+- Auto-discovers tray icons via D-Bus
+- Handles icon clicks and menus
+- Supports standard SNI protocol
+
+**Config:**
+```json
+{
+  "type": "tray",
+  "config": {
+    "icon_size": 16,
+    "spacing": 5
+  }
+}
+```
+
+**Status:** Stub implementation
+- D-Bus integration pending (needs libdbus/sd-bus)
+- Currently renders placeholders
+- Full implementation coming soon
+
