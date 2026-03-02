@@ -55,13 +55,11 @@ void TrayWidget::render(Renderer& renderer, int x, int y, int /*width*/,
   int current_x = x;
 
   for (size_t i = 0; i < icons_.size(); ++i) {
-    // Placeholder: render icon index as text
-    // TODO: Implement proper icon pixmap rendering
-    std::string label = std::to_string(i + 1);
-    Color fg = Color::from_hex("#89b4fa");
-    double text_y = y + (height / 2.0) + (8.0 / 3.0);
+    // Render placeholder box for each icon
+    Color box_color = Color::from_hex("#89b4fa");
+    int box_y = y + (height - icon_size_) / 2;
 
-    renderer.draw_text(label, current_x, text_y, "monospace", 8.0, fg);
+    renderer.fill_rect(current_x, box_y, icon_size_, icon_size_, box_color);
 
     current_x += icon_size_ + icon_spacing_;
   }
