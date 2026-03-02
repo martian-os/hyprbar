@@ -136,6 +136,14 @@ if git diff --cached --name-only | grep -qE '^(build/|bin/|.*\.o$)'; then
     exit 1
 fi
 
+# Check code formatting
+echo "📝 Checking formatting..."
+make format-check || {
+    echo "❌ Code formatting failed!"
+    echo "Run: make format"
+    exit 1
+}
+
 # Build project
 echo "🔨 Building..."
 make clean && make > /dev/null 2>&1 || {

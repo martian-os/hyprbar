@@ -106,6 +106,28 @@ help:
 	@echo "  uninstall - Remove from /usr/local/bin"
 	@echo "  help      - Show this help message"
 
+format-check:
+	@echo "🔍 Checking code formatting..."
+	@FAILED=0; \
+	for file in $$(find src tests include -name '*.cpp' -o -name '*.h' 2>/dev/null); do \
+		if ! clang-format --dry-run --Werror "$$file" 2>/dev/null; then \
+			echo "❌ $$file needs formatting"; \
+			FAILED=1; \
+		fi; \
+	done; \
+	if [ $$FAILED -eq 1 ]; then \
+		echo ""; \
+		echo "Fix with: make format"; \
+		exit 1; \
+	else \
+		echo "✅ All files properly formatted"; \
+	fi
+
+format:
+	@echo "🔨 Formatting all C++ files..."
+	@find src tests include -name '*.cpp' -o -name '*.h' 2>/dev/null | xargs clang-format -i
+	@echo "✅ Formatting complete"
+
 lint:
 	@echo "Running clang-tidy on all source files..."
 	@find src -name "*.cpp" | while read file; do \

@@ -202,7 +202,7 @@ private:
 
   Config config_;
   std::string error_;
-  std::string config_dir_;  // Directory containing config file
+  std::string config_dir_; // Directory containing config file
 };
 
 } // namespace hyprbar

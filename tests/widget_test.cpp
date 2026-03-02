@@ -1,8 +1,8 @@
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/widgets/script_widget.h"
 #include "test_utils.h"
-#include <thread>
 #include <chrono>
+#include <thread>
 
 using namespace hyprbar;
 
