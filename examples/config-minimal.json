@@ -22,7 +22,6 @@
       "config": {
         "command": "../widgets/cpu.sh",
         "interval": 2000,
-        "size": 12,
         "color": "#f38ba8"
       }
     },
@@ -32,7 +31,6 @@
       "config": {
         "command": "../widgets/memory.sh",
         "interval": 5000,
-        "size": 12,
         "color": "#fab387"
       }
     }

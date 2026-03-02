@@ -23,7 +23,6 @@
       "config": {
         "command": "../widgets/uptime.sh",
         "interval": 60000,
-        "size": 12,
         "color": "#94e2d5"
       }
     },
@@ -33,7 +32,6 @@
       "config": {
         "command": "../widgets/cpu.sh",
         "interval": 2000,
-        "size": 12,
         "color": "#f38ba8"
       }
     },
@@ -43,7 +41,6 @@
       "config": {
         "command": "../widgets/memory.sh",
         "interval": 5000,
-        "size": 12,
         "color": "#fab387"
       }
     },
@@ -53,7 +50,6 @@
       "config": {
         "command": "../widgets/disk.sh",
         "interval": 60000,
-        "size": 12,
         "color": "#a6e3a1"
       }
     },
@@ -63,7 +59,6 @@
       "config": {
         "command": "../widgets/volume.sh",
         "interval": 5000,
-        "size": 12,
         "color": "#b4befe"
       }
     },
@@ -73,7 +68,6 @@
       "config": {
         "command": "../widgets/network.sh",
         "interval": 10000,
-        "size": 12,
         "color": "#74c7ec"
       }
     },
@@ -83,7 +77,6 @@
       "config": {
         "command": "../widgets/battery.sh",
         "interval": 30000,
-        "size": 12,
         "color": "#cba6f7"
       }
     }
