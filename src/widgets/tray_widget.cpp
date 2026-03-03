@@ -376,6 +376,12 @@ void TrayWidget::fetch_tray_items() {
       "org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher",
       "org.freedesktop.DBus.Properties", "Get");
 
+  if (!msg) {
+    Logger::instance().error("Failed to create D-Bus message");
+    dbus_connection_unref(conn);
+    return;
+  }
+
   const char* interface = "org.kde.StatusNotifierWatcher";
   const char* property = "RegisteredStatusNotifierItems";
 
@@ -505,6 +511,13 @@ void TrayWidget::fetch_icon_data(TrayIcon& icon) {
       dbus_message_new_method_call(icon.service.c_str(), icon.path.c_str(),
                                    "org.freedesktop.DBus.Properties", "Get");
 
+  if (!msg) {
+    Logger::instance().warn(
+        "Failed to create D-Bus message for IconPixmap query");
+    dbus_connection_unref(conn);
+    return;
+  }
+
   const char* interface = "org.kde.StatusNotifierItem";
   const char* property = "IconPixmap";
 
@@ -579,6 +592,13 @@ void TrayWidget::fetch_icon_data(TrayIcon& icon) {
     msg =
         dbus_message_new_method_call(icon.service.c_str(), icon.path.c_str(),
                                      "org.freedesktop.DBus.Properties", "Get");
+
+    if (!msg) {
+      Logger::instance().warn(
+          "Failed to create D-Bus message for IconName query");
+      dbus_connection_unref(conn);
+      return;
+    }
 
     property = "IconName";
     dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface,
