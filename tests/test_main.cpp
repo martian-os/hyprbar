@@ -10,6 +10,7 @@ void run_bar_config_tests();
 void run_style_tests();
 void run_hyprland_mock_tests();
 void run_widget_manager_tests();
+void run_tray_widget_tests();
 
 int main() {
   std::cout << "\n========================================" << std::endl;
@@ -26,6 +27,7 @@ int main() {
   run_style_tests();
   run_hyprland_mock_tests();
   run_widget_manager_tests();
+  run_tray_widget_tests();
 
   std::cout << "\n========================================" << std::endl;
   std::cout << "Tests passed: " << test::get_passed() << std::endl;

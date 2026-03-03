@@ -1,132 +1,153 @@
 #!/usr/bin/env python3
 """
-Mock Hyprland IPC server for testing HyprlandWidget.
+Mock Hyprland IPC server for testing - synchronous version with proper cleanup.
 
-Creates two Unix sockets that simulate Hyprland's IPC:
-1. .socket.sock - Command socket (responds to j/workspaces, j/activeworkspace)
-2. .socket2.sock - Event socket (sends workspace events)
-
-Usage:
-    python3 mock_hyprland_server.py /tmp/mock_hypr/test_instance
+Creates Unix sockets that simulate Hyprland's IPC protocol.
+Designed to be started/stopped quickly for unit tests.
 """
 
 import socket
 import os
 import sys
+import json
+import signal
 import threading
 import time
-import json
 
 class MockHyprlandServer:
     def __init__(self, socket_dir):
         self.socket_dir = socket_dir
-        self.command_socket_path = os.path.join(socket_dir, '.socket.sock')
-        self.event_socket_path = os.path.join(socket_dir, '.socket2.sock')
+        self.command_path = os.path.join(socket_dir, '.socket.sock')
+        self.event_path = os.path.join(socket_dir, '.socket2.sock')
         self.running = False
+        self.command_sock = None
+        self.event_sock = None
         
-        # Mock workspace data
+        # Mock data
         self.workspaces = [
             {"id": 1, "name": "1", "windows": 3},
             {"id": 2, "name": "2", "windows": 1},
             {"id": 3, "name": "3", "windows": 0},
-            {"id": 4, "name": "4", "windows": 0},
         ]
-        self.active_workspace_id = 1
+        self.active_id = 1
         
     def start(self):
-        """Start the mock server"""
+        """Start server (blocks)"""
         os.makedirs(self.socket_dir, exist_ok=True)
         self.running = True
         
-        # Start command socket thread
-        self.command_thread = threading.Thread(target=self._run_command_socket, daemon=True)
-        self.command_thread.start()
+        # Setup signal handler for clean shutdown
+        signal.signal(signal.SIGTERM, lambda s, f: self.stop())
         
-        # Start event socket thread
-        self.event_thread = threading.Thread(target=self._run_event_socket, daemon=True)
-        self.event_thread.start()
+        # Start command socket in thread
+        cmd_thread = threading.Thread(target=self._run_command_socket, daemon=False)
+        cmd_thread.start()
         
-        print(f"Mock Hyprland server started at {self.socket_dir}", file=sys.stderr)
+        # Start event socket in thread
+        evt_thread = threading.Thread(target=self._run_event_socket, daemon=False)
+        evt_thread.start()
         
+        print(f"Mock Hyprland ready: {self.socket_dir}", file=sys.stderr, flush=True)
+        
+        # Keep main thread alive
+        try:
+            while self.running:
+                time.sleep(0.1)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.stop()
+            
     def stop(self):
-        """Stop the mock server"""
+        """Stop server and clean up"""
         self.running = False
         
-        # Clean up sockets
-        for path in [self.command_socket_path, self.event_socket_path]:
-            if os.path.exists(path):
-                os.unlink(path)
+        # Close sockets
+        if self.command_sock:
+            try:
+                self.command_sock.close()
+            except:
+                pass
+        if self.event_sock:
+            try:
+                self.event_sock.close()
+            except:
+                pass
                 
+        # Remove socket files
+        for path in [self.command_path, self.event_path]:
+            try:
+                if os.path.exists(path):
+                    os.unlink(path)
+            except:
+                pass
+                
+        print("Mock Hyprland stopped", file=sys.stderr, flush=True)
+        
     def _run_command_socket(self):
-        """Run the command socket (responds to queries)"""
-        # Clean up old socket
-        if os.path.exists(self.command_socket_path):
-            os.unlink(self.command_socket_path)
+        """Handle command requests"""
+        if os.path.exists(self.command_path):
+            os.unlink(self.command_path)
             
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.bind(self.command_socket_path)
-        sock.listen(1)
-        sock.settimeout(0.1)
+        self.command_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.command_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.command_sock.bind(self.command_path)
+        self.command_sock.listen(5)
+        self.command_sock.settimeout(0.1)
         
         while self.running:
             try:
-                conn, _ = sock.accept()
-                self._handle_command(conn)
+                conn, _ = self.command_sock.accept()
+                conn.settimeout(1.0)
+                try:
+                    data = conn.recv(1024).decode('utf-8').strip()
+                    
+                    if data == 'j/workspaces':
+                        response = json.dumps(self.workspaces)
+                    elif data == 'j/activeworkspace':
+                        active = next((w for w in self.workspaces if w['id'] == self.active_id), self.workspaces[0])
+                        response = json.dumps(active)
+                    else:
+                        response = "{}"
+                        
+                    conn.sendall(response.encode('utf-8'))
+                finally:
+                    conn.close()
             except socket.timeout:
                 continue
             except Exception as e:
-                print(f"Command socket error: {e}", file=sys.stderr)
-                
-        sock.close()
-        
-    def _handle_command(self, conn):
-        """Handle a command from client"""
-        try:
-            data = conn.recv(1024).decode('utf-8').strip()
-            
-            if data == 'j/workspaces':
-                response = json.dumps(self.workspaces) + '\n'
-                conn.sendall(response.encode('utf-8'))
-            elif data == 'j/activeworkspace':
-                active = next((w for w in self.workspaces if w['id'] == self.active_workspace_id), self.workspaces[0])
-                response = json.dumps(active) + '\n'
-                conn.sendall(response.encode('utf-8'))
-            else:
-                conn.sendall(b'{}\n')
-                
-        except Exception as e:
-            print(f"Error handling command: {e}", file=sys.stderr)
-        finally:
-            conn.close()
-            
+                if self.running:
+                    print(f"Command socket error: {e}", file=sys.stderr)
+                    
     def _run_event_socket(self):
-        """Run the event socket (sends workspace change events)"""
-        # Clean up old socket
-        if os.path.exists(self.event_socket_path):
-            os.unlink(self.event_socket_path)
+        """Handle event stream (just accept connections, don't send events)"""
+        if os.path.exists(self.event_path):
+            os.unlink(self.event_path)
             
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.bind(self.event_socket_path)
-        sock.listen(5)
-        sock.settimeout(0.1)
+        self.event_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.event_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.event_sock.bind(self.event_path)
+        self.event_sock.listen(5)
+        self.event_sock.settimeout(0.1)
         
         clients = []
         
         while self.running:
             try:
-                conn, _ = sock.accept()
+                conn, _ = self.event_sock.accept()
                 clients.append(conn)
             except socket.timeout:
-                pass
+                continue
             except Exception as e:
-                print(f"Event socket error: {e}", file=sys.stderr)
-                
-        sock.close()
-        
-    def send_workspace_event(self, workspace_id):
-        """Simulate a workspace change event"""
-        self.active_workspace_id = workspace_id
-        # In real implementation, would send to connected clients
+                if self.running:
+                    print(f"Event socket error: {e}", file=sys.stderr)
+                    
+        # Clean up clients
+        for conn in clients:
+            try:
+                conn.close()
+            except:
+                pass
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -135,11 +156,3 @@ if __name__ == '__main__':
         
     server = MockHyprlandServer(sys.argv[1])
     server.start()
-    
-    try:
-        # Keep running until interrupted
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        server.stop()
-        print("\nMock server stopped", file=sys.stderr)
