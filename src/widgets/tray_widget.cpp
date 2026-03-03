@@ -398,15 +398,48 @@ void TrayWidget::fetch_tray_items() {
         dbus_message_iter_get_basic(&array, &service_str);
 
         TrayIcon icon;
-        icon.service = service_str;
+        std::string item_str = service_str;
 
-        // Parse service name (format: ":1.23@/StatusNotifierItem")
-        size_t at_pos = icon.service.find('@');
+        // Parse service name and path
+        // Format can be:
+        // 1. "service@path" (most common)
+        // 2. "service/path" (alternative, deprecated)
+        size_t at_pos = item_str.find('@');
+        size_t slash_pos = item_str.find('/');
+
         if (at_pos != std::string::npos) {
-          icon.path = icon.service.substr(at_pos + 1);
-          icon.service = icon.service.substr(0, at_pos);
+          // Format: service@path
+          icon.service = item_str.substr(0, at_pos);
+          icon.path = item_str.substr(at_pos + 1);
+          Logger::instance().debug(
+              "Parsed item (@ format): service='{}', path='{}'", icon.service,
+              icon.path);
+        } else if (slash_pos != std::string::npos) {
+          // Format: service/path (e.g., ":1.5/org/ayatana/...")
+          // Service name is everything before first '/'
+          icon.service = item_str.substr(0, slash_pos);
+          icon.path = "/" + item_str.substr(slash_pos + 1);
+          Logger::instance().debug(
+              "Parsed item (/ format): service='{}', path='{}'", icon.service,
+              icon.path);
         } else {
+          // No separator, assume service only
+          icon.service = item_str;
           icon.path = "/StatusNotifierItem";
+          Logger::instance().debug(
+              "Parsed item (no separator): service='{}', path='{}'",
+              icon.service, icon.path);
+        }
+
+        // Validate service name (must start with : for unique names or be a
+        // well-known name)
+        if (icon.service.empty() ||
+            (icon.service[0] != ':' &&
+             icon.service.find('.') == std::string::npos)) {
+          Logger::instance().warn("Invalid service name format: '{}', skipping",
+                                  item_str);
+          dbus_message_iter_next(&array);
+          continue;
         }
 
         fetch_icon_data(icon);
