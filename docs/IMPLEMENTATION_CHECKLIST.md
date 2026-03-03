@@ -1,106 +1,115 @@
-# Implementation Checklist - Architecture & Quality Issues
+# Implementation Checklist - Remaining Issues
 
 ## Status Legend
-- ✅ Done
+- ✅ Done (committed)
 - 🔄 In Progress
 - ❌ Not Started
 
 ---
 
-## Architecture Review Issues
+## Phase 1 & 2: ✅ COMPLETE
 
-### 🔴 Critical (Must Fix Now)
+**All critical and security issues resolved:**
+- Struct/class mismatch
+- Constructor initialization order
+- Unused variables
+- D-Bus null checks
+- Script command validation (SecurityValidator)
+- Path traversal protection
+- Const correctness verified
+- Override keywords verified
 
-- [x] ✅ **1.1 Struct/Class Mismatch** - `ConfigValue` forward declaration (already fixed)
-- [x] ✅ **1.2 Constructor Initialization Order** - ConfigValue members (already correct)
-- [x] ✅ **1.3 Unused Variable** - `left_total` in widget_manager.cpp:129 (already removed)
-- [x] ✅ **5.1 Script Execution Security** - Command injection risk (FIXED)
-- [x] ✅ **5.2 Path Traversal** - File path validation (FIXED)
+---
+
+## Phase 3: Quality Improvements (In Progress)
+
+### 🔴 Critical
+
+- [ ] ❌ **Issue 1: Use-after-free in event loop**
+  - **Location:** src/core/event_loop.cpp
+  - **Problem:** Handler can call remove_fd() during event processing
+  - **Impact:** Undefined behavior, iterator invalidation
+  - **Fix:** Defer removals with pending_removals_ vector
+  - **Code:**
+    ```cpp
+    std::vector<int> pending_removals_;
+    bool in_event_loop_{false};
+    
+    void remove_fd(int fd) {
+      if (in_event_loop_) {
+        pending_removals_.push_back(fd);
+      } else {
+        // immediate removal
+      }
+    }
+    ```
 
 ### 🟡 Medium Priority
 
-- [ ] ❌ **1.4 Unused Parameter** - `version` in wayland_manager.cpp:288
-- [ ] ❌ **1.5 Missing Field Initializer** - `axis_value120` in listener
-- [ ] ❌ **1.6 Constructor Reordering** - script_widget.cpp:12
+- [ ] ❌ **Issue 2: RAII violations**
+  - **Location:** src/widgets/tray_widget.cpp
+  - **Problem:** GError, GdkPixbuf not wrapped in RAII
+  - **Impact:** Potential memory leaks on early returns
+  - **Fix:** Create RAII wrappers (GErrorPtr, GObjectPtr)
+  - **Code:**
+    ```cpp
+    struct GErrorDeleter { void operator()(GError* e) { g_error_free(e); } };
+    using GErrorPtr = std::unique_ptr<GError, GErrorDeleter>;
+    
+    struct GObjectUnref { void operator()(gpointer p) { g_object_unref(p); } };
+    template<typename T>
+    using GObjectPtr = std::unique_ptr<T, GObjectUnref>;
+    ```
 
-### 🟢 Low Priority (Future)
+- [ ] ❌ **Issue 3: Raw pointers in API**
+  - **Location:** src/widgets/widget_manager.cpp - get_widget()
+  - **Problem:** Returns raw pointer from unique_ptr
+  - **Impact:** Unclear ownership, potential dangling pointers
+  - **Fix Option 1:** Return reference instead
+  - **Fix Option 2:** Document ownership clearly
 
-- [ ] ❌ **2.5 Global State** - Wrap in Application class
-- [ ] ❌ **2.6 Error Handling** - Standardize approach
-- [ ] ❌ **2.7 Logger Design** - Dependency injection
-- [ ] ❌ **2.8 ConfigValue Variant** - Use std::variant
-- [ ] ❌ **2.9 Widget Registration** - Plugin architecture
-- [ ] ❌ **2.10 Path Resolution** - Extract PathResolver class
-- [ ] ❌ **2.11 Renderer Text API** - Abstract text engine
-- [ ] ❌ **2.12 Magic Numbers** - Named constants
-
----
-
-## Quality Gates Issues
-
-### 🔴 Critical (Implemented)
-
-- [x] ✅ **Static Analysis** - clang-tidy, cppcheck (commit faf27de)
-- [x] ✅ **Memory Safety** - ASan, TSan targets (commit faf27de)
-- [x] ✅ **Quality Shortcuts** - quality-fast, quality-full (commit faf27de)
-
-### Code Issues to Fix
-
-- [x] ✅ **Issue 1: Missing null checks in D-Bus code**
-  - Location: src/widgets/tray_widget.cpp (3 locations)
-  - Fixed: Added null checks after all dbus_message_new_method_call
-
-- [ ] ❌ **Issue 2: Use-after-free in event loop**
-  - Location: src/core/event_loop.cpp
-  - Fix: Defer fd removals with pending_removals_ vector
-
-- [x] ✅ **Issue 3: Missing mutex in TrayWidget::update_icons()**
-  - Not applicable - function doesn't exist or already handled
-
-- [ ] ❌ **Issue 4: RAII violations**
-  - Location: src/widgets/tray_widget.cpp (GError, GdkPixbuf)
-  - Fix: Create RAII wrappers (GErrorPtr, GObjectPtr)
-
-- [x] ✅ **Issue 5: Missing const correctness**
-  - Location: Multiple widget classes
-  - Status: Already correct - all getters are const
-
-- [x] ✅ **Issue 6: Missing override keywords**
-  - Location: All widget subclasses
-  - Status: Already correct - all have override keywords
-
-- [ ] ❌ **Issue 7: Raw pointers in API**
-  - Location: WidgetManager::get_widget()
-  - Fix: Return reference instead of raw pointer
-
-- [ ] ❌ **Issue 8: Exception safety**
-  - Location: Various
-  - Fix: Add noexcept where appropriate
+- [ ] ❌ **Issue 4: Exception safety**
+  - **Location:** Various files
+  - **Problem:** Missing noexcept, unclear exception guarantees
+  - **Impact:** Unclear error handling contract
+  - **Fix:** Add noexcept to non-throwing functions, document exceptions
 
 ---
 
-## Implementation Order
+## Phase 4: Architectural Improvements (Low Priority, Future)
 
-### Phase 1: Critical Fixes (Today) - ✅ COMPLETE
-1. ✅ Struct/class mismatch
-2. ✅ Constructor initialization order
-3. ✅ Remove unused variables
-4. ✅ Add D-Bus null checks
-5. ✅ Fix TrayWidget mutex
-6. ✅ Add const correctness
-7. ✅ Add override keywords
+- [ ] ❌ **2.1 Global State** - Wrap in Application class
+- [ ] ❌ **2.2 Error Handling** - Standardize approach (std::expected?)
+- [ ] ❌ **2.3 Logger Design** - Dependency injection instead of singleton
+- [ ] ❌ **2.4 ConfigValue Variant** - Use std::variant instead of manual union
+- [ ] ❌ **2.5 Widget Registration** - Plugin architecture with registry
+- [ ] ❌ **2.6 Path Resolution** - Extract PathResolver class
+- [ ] ❌ **2.7 Renderer Text API** - Abstract text engine interface
+- [ ] ❌ **2.8 Magic Numbers** - Named constants
 
-### Phase 2: Security (This Week) - ✅ COMPLETE
-8. ✅ Script command validation
-9. ✅ Path traversal protection
+---
 
-### Phase 3: Quality (Next Week)
-10. ❌ RAII wrappers
-11. ❌ Use-after-free fix
-12. ❌ Raw pointer fix
-13. ❌ Exception safety
+## Implementation Priority
 
-### Phase 4: Refactoring (Future)
-14. ❌ Application class wrapper
-15. ❌ Error handling standardization
-16. ❌ Other architectural improvements
+### This Week (Critical)
+1. ❌ Fix use-after-free in event loop
+2. ❌ Add RAII wrappers for GError/GdkPixbuf
+3. ❌ Document or fix raw pointer API
+
+### Next Week (Important)
+4. ❌ Add exception safety (noexcept, documentation)
+
+### Future (When Time Allows)
+5. ❌ Architectural refactoring (Phase 4 items)
+
+---
+
+## Notes
+
+- **Phases 1 & 2 complete** - All critical compiler warnings and security issues fixed
+- **4 quality issues remaining** - Use-after-free is the most critical
+- **8 architectural improvements** - Low priority, future refinements
+- **Static analysis infrastructure in place** - clang-tidy, cppcheck, sanitizers
+- **Test infrastructure ready** - Fast tests, mock services, RAII guards
+
+**Next action:** Fix use-after-free bug in event loop (highest priority).
