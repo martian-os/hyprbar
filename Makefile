@@ -2,8 +2,8 @@
 
 # Compiler and flags
 CXX = clang++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O2 -Iinclude $(shell pkg-config --cflags pangocairo)
-LDFLAGS = -lwayland-client -lcairo $(shell pkg-config --libs pangocairo)
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O2 -Iinclude $(shell pkg-config --cflags pangocairo dbus-1 gdk-pixbuf-2.0)
+LDFLAGS = -lwayland-client -lcairo -ldbus-1 $(shell pkg-config --libs pangocairo gdk-pixbuf-2.0)
 
 # Directories
 SRC_DIR = src

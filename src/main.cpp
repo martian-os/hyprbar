@@ -63,9 +63,18 @@ int run_screenshot_mode(const std::string& output_path,
   Logger::instance().info("Screenshot mode: {}", output_path);
   const Config& config = config_mgr.get_config();
 
+  // Use 3840 (4K width) for wider virtual screen
+  uint32_t screenshot_width = 3840;
+
+  // Check for HYPRBAR_SCREENSHOT_WIDTH environment variable
+  const char* env_width = std::getenv("HYPRBAR_SCREENSHOT_WIDTH");
+  if (env_width) {
+    screenshot_width = static_cast<uint32_t>(std::atoi(env_width));
+  }
+
   // Initialize renderer
   app.renderer = std::make_unique<Renderer>();
-  if (!app.renderer->initialize(1920, config.bar.height)) {
+  if (!app.renderer->initialize(screenshot_width, config.bar.height)) {
     Logger::instance().error("Failed to initialize renderer");
     return 1;
   }

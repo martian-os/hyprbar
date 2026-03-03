@@ -85,6 +85,8 @@ public:
   void fill_rect(double x, double y, double w, double h, const Color& color);
   void draw_text(const std::string& text, double x, double y,
                  const std::string& font, double size, const Color& color);
+  void draw_surface(cairo_surface_t* source, double x, double y, double width,
+                    double height);
 
   /**
    * Measure text width using Pango

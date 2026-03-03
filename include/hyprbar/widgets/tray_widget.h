@@ -2,11 +2,15 @@
 
 #include "widget.h"
 #include <atomic>
+#include <cairo/cairo.h>
 #include <map>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
+
+// Forward declarations
+typedef struct _GdkPixbuf GdkPixbuf;
 
 namespace hyprbar {
 
@@ -44,6 +48,7 @@ private:
     std::string path;
     std::string title;
     std::string tooltip;
+    std::string icon_name; // Icon theme name (fallback if no pixmap)
     int width = 16;
     int height = 16;
     std::vector<uint8_t> pixmap_data;
@@ -52,6 +57,8 @@ private:
   void dbus_listener_thread();
   void fetch_tray_items();
   void fetch_icon_data(TrayIcon& icon);
+  cairo_surface_t* load_icon_from_theme(const std::string& icon_name, int size);
+  cairo_surface_t* pixbuf_to_cairo_surface(GdkPixbuf* pixbuf);
 
   int icon_size_ = 16;
   int icon_spacing_ = 5;

@@ -33,6 +33,14 @@
         "interval": 5000,
         "color": "#fab387"
       }
+    },
+    {
+      "type": "tray",
+      "position": "right",
+      "config": {
+        "icon_size": 20,
+        "spacing": 8
+      }
     }
   ]
 }

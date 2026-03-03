@@ -187,4 +187,30 @@ int Renderer::measure_text_width(const std::string& text,
   return width;
 }
 
+void Renderer::draw_surface(cairo_surface_t* source, double x, double y,
+                            double width, double height) {
+  if (!source)
+    return;
+
+  cairo_save(cr_);
+
+  // Get source dimensions
+  int src_width = cairo_image_surface_get_width(source);
+  int src_height = cairo_image_surface_get_height(source);
+
+  // Calculate scaling
+  double scale_x = width / src_width;
+  double scale_y = height / src_height;
+
+  // Position and scale
+  cairo_translate(cr_, x, y);
+  cairo_scale(cr_, scale_x, scale_y);
+
+  // Draw
+  cairo_set_source_surface(cr_, source, 0, 0);
+  cairo_paint(cr_);
+
+  cairo_restore(cr_);
+}
+
 } // namespace hyprbar

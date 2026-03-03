@@ -15,6 +15,14 @@
         "command": "../widgets/date.sh",
         "interval": 1000
       }
+    },
+    {
+      "type": "tray",
+      "position": "right",
+      "config": {
+        "icon_size": 20,
+        "spacing": 8
+      }
     }
   ]
 }
