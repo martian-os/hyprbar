@@ -147,6 +147,26 @@ int TrayWidget::get_desired_height() const {
 
 cairo_surface_t* TrayWidget::load_icon_from_theme(const std::string& icon_name,
                                                   int size) {
+  // Generate icon name variants for fallback
+  // 1. Original name (e.g., "nm-signal-75")
+  // 2. With -symbolic suffix (e.g., "nm-signal-75-symbolic")
+  // 3. Without -symbolic if present (e.g., "nm-signal-75" from
+  // "nm-signal-75-symbolic")
+  std::vector<std::string> icon_variants;
+  icon_variants.push_back(icon_name);
+
+  // Try with -symbolic suffix
+  if (icon_name.find("-symbolic") == std::string::npos) {
+    icon_variants.push_back(icon_name + "-symbolic");
+  }
+
+  // Try without -symbolic if present
+  if (icon_name.size() >= 9 &&
+      icon_name.substr(icon_name.size() - 9) == "-symbolic") {
+    icon_variants.push_back(
+        icon_name.substr(0, icon_name.length() - 9)); // Remove "-symbolic"
+  }
+
   // Icon theme search paths (in priority order)
   std::vector<std::string> theme_paths = {
       "/usr/share/icons/Adwaita",
@@ -175,52 +195,56 @@ cairo_surface_t* TrayWidget::load_icon_from_theme(const std::string& icon_name,
                                       "/16/status/",
                                       "/16/apps/"};
 
-  // Try finding the icon file
-  for (const auto& theme_path : theme_paths) {
-    for (const auto& subdir : subdirs) {
-      // Try SVG first
-      std::string svg_path = theme_path + subdir + icon_name + ".svg";
-      if (std::filesystem::exists(svg_path)) {
-        GError* error = nullptr;
-        GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file_at_size(
-            svg_path.c_str(), size, size, &error);
+  // Try all icon name variants
+  for (const auto& variant : icon_variants) {
+    // Try finding the icon file
+    for (const auto& theme_path : theme_paths) {
+      for (const auto& subdir : subdirs) {
+        // Try SVG first
+        std::string svg_path = theme_path + subdir + variant + ".svg";
+        if (std::filesystem::exists(svg_path)) {
+          GError* error = nullptr;
+          GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file_at_size(
+              svg_path.c_str(), size, size, &error);
 
-        if (pixbuf) {
-          cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf);
-          g_object_unref(pixbuf);
-          Logger::instance().debug("Loaded icon from: {}", svg_path);
-          return surface;
+          if (pixbuf) {
+            cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf);
+            g_object_unref(pixbuf);
+            Logger::instance().debug("Loaded icon from: {}", svg_path);
+            return surface;
+          }
+
+          if (error) {
+            Logger::instance().warn("Failed to load {}: {}", svg_path,
+                                    error->message);
+            g_error_free(error);
+          }
         }
 
-        if (error) {
-          Logger::instance().warn("Failed to load {}: {}", svg_path,
-                                  error->message);
-          g_error_free(error);
-        }
-      }
+        // Try PNG
+        std::string png_path = theme_path + subdir + variant + ".png";
+        if (std::filesystem::exists(png_path)) {
+          GError* error = nullptr;
+          GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file_at_size(
+              png_path.c_str(), size, size, &error);
 
-      // Try PNG
-      std::string png_path = theme_path + subdir + icon_name + ".png";
-      if (std::filesystem::exists(png_path)) {
-        GError* error = nullptr;
-        GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file_at_size(
-            png_path.c_str(), size, size, &error);
+          if (pixbuf) {
+            cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf);
+            g_object_unref(pixbuf);
+            Logger::instance().debug("Loaded icon from: {}", png_path);
+            return surface;
+          }
 
-        if (pixbuf) {
-          cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf);
-          g_object_unref(pixbuf);
-          Logger::instance().debug("Loaded icon from: {}", png_path);
-          return surface;
-        }
-
-        if (error) {
-          g_error_free(error);
+          if (error) {
+            g_error_free(error);
+          }
         }
       }
     }
   }
 
-  Logger::instance().warn("Icon not found in theme: {}", icon_name);
+  Logger::instance().warn("Icon not found in theme: {} (tried {} variants)",
+                          icon_name, icon_variants.size());
   return nullptr;
 }
 
