@@ -56,7 +56,15 @@ $(BUILD_DIR)/protocol_%.o: $(PROTOCOL_DIR)/%.c
 # Test target
 test: dirs $(TEST_TARGET)
 	@echo "Running tests..."
-	@$(TEST_TARGET)
+	@echo "Starting mock Hyprland server..."
+	@python3 tests/mock_hyprland_server.py /tmp/hypr_mock_test & \
+	MOCK_PID=$$! ; \
+	sleep 0.5 ; \
+	export HYPRLAND_INSTANCE_SIGNATURE=mock_test ; \
+	$(TEST_TARGET) ; \
+	TEST_RESULT=$$? ; \
+	kill $$MOCK_PID 2>/dev/null || true ; \
+	exit $$TEST_RESULT
 
 # Build test executable
 $(TEST_TARGET): $(TEST_OBJECTS) $(filter-out $(BUILD_DIR)/main.o,$(OBJECTS))
