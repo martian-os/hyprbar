@@ -39,14 +39,37 @@ bool EventLoop::add_fd(int fd, uint32_t events, EventHandler handler) {
 }
 
 void EventLoop::remove_fd(int fd) {
+  // If we're inside dispatch(), defer the removal to avoid iterator
+  // invalidation
+  if (in_dispatch_) {
+    pending_fd_removals_.push_back(fd);
+    return;
+  }
+
+  // Remove from epoll
   epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
 
+  // Remove from handlers list
   auto it = std::find_if(handlers_.begin(), handlers_.end(),
                          [fd](const FdHandler& h) { return h.fd == fd; });
 
   if (it != handlers_.end()) {
     handlers_.erase(it);
   }
+}
+
+void EventLoop::process_pending_fd_removals() {
+  for (int fd : pending_fd_removals_) {
+    epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
+
+    auto it = std::find_if(handlers_.begin(), handlers_.end(),
+                           [fd](const FdHandler& h) { return h.fd == fd; });
+
+    if (it != handlers_.end()) {
+      handlers_.erase(it);
+    }
+  }
+  pending_fd_removals_.clear();
 }
 
 int EventLoop::add_timer(Duration interval, TimerCallback callback) {
@@ -149,6 +172,9 @@ bool EventLoop::dispatch(int timeout_ms) {
     return false;
   }
 
+  // Mark that we're inside dispatch (prevents immediate fd removal)
+  in_dispatch_ = true;
+
   // Process expired timers first
   process_timers();
 
@@ -171,9 +197,13 @@ bool EventLoop::dispatch(int timeout_ms) {
 
   if (n < 0) {
     if (errno == EINTR) {
+      in_dispatch_ = false;
+      process_pending_fd_removals();
       return !shutdown_requested_;
     }
     std::cerr << "epoll_wait failed: " << errno << std::endl;
+    in_dispatch_ = false;
+    process_pending_fd_removals();
     return false;
   }
 
@@ -186,12 +216,17 @@ bool EventLoop::dispatch(int timeout_ms) {
                            [fd](const FdHandler& h) { return h.fd == fd; });
 
     if (it != handlers_.end()) {
+      // Handler might call remove_fd(), which will defer removal
       it->handler(fd, revents);
     }
   }
 
   // Process timers again after handling events
   process_timers();
+
+  // Now safe to remove any fds that were marked for removal
+  in_dispatch_ = false;
+  process_pending_fd_removals();
 
   return !shutdown_requested_;
 }

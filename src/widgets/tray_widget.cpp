@@ -1,5 +1,6 @@
 #include "hyprbar/widgets/tray_widget.h"
 #include "hyprbar/core/config_manager.h"
+#include "hyprbar/core/glib_utils.h"
 #include "hyprbar/core/logger.h"
 #include "hyprbar/rendering/renderer.h"
 #include <cstring>
@@ -133,7 +134,7 @@ void TrayWidget::render(Renderer& renderer, int x, int y, int /*width*/,
   }
 }
 
-int TrayWidget::get_desired_width() const {
+int TrayWidget::get_desired_width() const noexcept {
   std::lock_guard<std::mutex> lock(icons_mutex_);
   if (icons_.empty())
     return 0;
@@ -141,7 +142,7 @@ int TrayWidget::get_desired_width() const {
          icon_spacing_;
 }
 
-int TrayWidget::get_desired_height() const {
+int TrayWidget::get_desired_height() const noexcept {
   return 0; // Flexible
 }
 
@@ -203,13 +204,13 @@ cairo_surface_t* TrayWidget::load_icon_from_theme(const std::string& icon_name,
         // Try SVG first
         std::string svg_path = theme_path + subdir + variant + ".svg";
         if (std::filesystem::exists(svg_path)) {
-          GError* error = nullptr;
-          GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file_at_size(
-              svg_path.c_str(), size, size, &error);
+          GError* raw_error = nullptr;
+          GObjectPtr<GdkPixbuf> pixbuf(gdk_pixbuf_new_from_file_at_size(
+              svg_path.c_str(), size, size, &raw_error));
+          GErrorPtr error(raw_error);
 
           if (pixbuf) {
-            cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf);
-            g_object_unref(pixbuf);
+            cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf.get());
             Logger::instance().debug("Loaded icon from: {}", svg_path);
             return surface;
           }
@@ -217,26 +218,21 @@ cairo_surface_t* TrayWidget::load_icon_from_theme(const std::string& icon_name,
           if (error) {
             Logger::instance().warn("Failed to load {}: {}", svg_path,
                                     error->message);
-            g_error_free(error);
           }
         }
 
         // Try PNG
         std::string png_path = theme_path + subdir + variant + ".png";
         if (std::filesystem::exists(png_path)) {
-          GError* error = nullptr;
-          GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file_at_size(
-              png_path.c_str(), size, size, &error);
+          GError* raw_error = nullptr;
+          GObjectPtr<GdkPixbuf> pixbuf(gdk_pixbuf_new_from_file_at_size(
+              png_path.c_str(), size, size, &raw_error));
+          GErrorPtr error(raw_error);
 
           if (pixbuf) {
-            cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf);
-            g_object_unref(pixbuf);
+            cairo_surface_t* surface = pixbuf_to_cairo_surface(pixbuf.get());
             Logger::instance().debug("Loaded icon from: {}", png_path);
             return surface;
-          }
-
-          if (error) {
-            g_error_free(error);
           }
         }
       }

@@ -102,14 +102,14 @@ void HyprlandWidget::render(Renderer& renderer, int x, int y, int /*width*/,
   }
 }
 
-int HyprlandWidget::get_desired_width() const {
+int HyprlandWidget::get_desired_width() const noexcept {
   std::lock_guard<std::mutex> lock(workspaces_mutex_);
   int button_width = 30;
   int spacing = 5;
   return static_cast<int>(workspaces_.size()) * (button_width + spacing);
 }
 
-int HyprlandWidget::get_desired_height() const {
+int HyprlandWidget::get_desired_height() const noexcept {
   return 0; // Flexible
 }
 

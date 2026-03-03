@@ -115,12 +115,15 @@ private:
   void handle_expired_timer(Timer& timer, TimePoint now);
   void remove_cancelled_timers();
   int get_next_timer_timeout() const;
+  void process_pending_fd_removals();
 
   int epoll_fd_;
   std::vector<FdHandler> handlers_;
   std::vector<Timer> timers_;
   int next_timer_id_;
   bool shutdown_requested_;
+  bool in_dispatch_{false};
+  std::vector<int> pending_fd_removals_;
 };
 
 } // namespace hyprbar

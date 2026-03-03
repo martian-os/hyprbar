@@ -33,8 +33,8 @@ public:
   bool initialize(const ConfigValue& config) override;
   bool update() override;
   void render(Renderer& renderer, int x, int y, int width, int height) override;
-  int get_desired_width() const override;
-  int get_desired_height() const override;
+  int get_desired_width() const noexcept override;
+  int get_desired_height() const noexcept override;
   std::string get_type() const override {
     return "script";
   }

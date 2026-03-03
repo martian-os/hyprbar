@@ -51,13 +51,13 @@ public:
    * Get desired width of widget (0 = flexible)
    * @return Desired width in pixels
    */
-  virtual int get_desired_width() const = 0;
+  virtual int get_desired_width() const noexcept = 0;
 
   /**
    * Get desired height of widget (0 = flexible)
    * @return Desired height in pixels
    */
-  virtual int get_desired_height() const = 0;
+  virtual int get_desired_height() const noexcept = 0;
 
   /**
    * Get widget type name
@@ -70,7 +70,7 @@ public:
    * @param y Y position relative to widget
    * @param button Button that was clicked
    */
-  virtual void on_click(int x, int y, uint32_t button) {
+  virtual void on_click(int x, int y, uint32_t button) noexcept {
     (void)x;
     (void)y;
     (void)button;

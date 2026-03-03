@@ -21,10 +21,10 @@ public:
   void render(Renderer& /*renderer*/, int /*x*/, int /*y*/, int /*width*/,
               int /*height*/) override {
   }
-  int get_desired_width() const override {
+  int get_desired_width() const noexcept override {
     return desired_width_;
   }
-  int get_desired_height() const override {
+  int get_desired_height() const noexcept override {
     return desired_height_;
   }
   std::string get_type() const override {

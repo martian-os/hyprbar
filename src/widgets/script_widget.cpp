@@ -157,12 +157,12 @@ void ScriptWidget::measure_width(Renderer& renderer) {
   }
 }
 
-int ScriptWidget::get_desired_width() const {
+int ScriptWidget::get_desired_width() const noexcept {
   std::lock_guard<std::mutex> lock(output_mutex_);
   return cached_width_;
 }
 
-int ScriptWidget::get_desired_height() const {
+int ScriptWidget::get_desired_height() const noexcept {
   return 0; // Flexible height
 }
 
