@@ -1,5 +1,6 @@
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/core/logger.h"
+#include "hyprbar/core/security_validator.h"
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -395,6 +396,23 @@ std::string ConfigManager::resolve_path(const std::string& path) const {
     return path;
   }
 
+  // Use SecurityValidator for safe path resolution
+  try {
+    std::filesystem::path base_dir = config_dir_.empty() || config_dir_ == "."
+                                         ? std::filesystem::current_path()
+                                         : std::filesystem::path(config_dir_);
+
+    std::filesystem::path resolved =
+        SecurityValidator::resolve_path_safely(path, base_dir);
+    return resolved.string();
+  } catch (const std::exception& e) {
+    Logger::instance().warn("Path resolution failed for '{}': {}", path,
+                            e.what());
+    // Fall back to basic resolution for backward compatibility
+    // but log the warning
+  }
+
+  // Fallback to original logic (for absolute paths or if validation fails)
   // Absolute path - return as-is
   if (path[0] == '/') {
     return path;

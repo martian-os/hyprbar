@@ -14,8 +14,8 @@
 - [x] ✅ **1.1 Struct/Class Mismatch** - `ConfigValue` forward declaration (already fixed)
 - [x] ✅ **1.2 Constructor Initialization Order** - ConfigValue members (already correct)
 - [x] ✅ **1.3 Unused Variable** - `left_total` in widget_manager.cpp:129 (already removed)
-- [ ] ❌ **5.1 Script Execution Security** - Command injection risk
-- [ ] ❌ **5.2 Path Traversal** - File path validation
+- [x] ✅ **5.1 Script Execution Security** - Command injection risk (FIXED)
+- [x] ✅ **5.2 Path Traversal** - File path validation (FIXED)
 
 ### 🟡 Medium Priority
 
@@ -81,7 +81,7 @@
 
 ## Implementation Order
 
-### Phase 1: Critical Fixes (Today) - PARTIALLY DONE
+### Phase 1: Critical Fixes (Today) - ✅ COMPLETE
 1. ✅ Struct/class mismatch
 2. ✅ Constructor initialization order
 3. ✅ Remove unused variables
@@ -90,9 +90,9 @@
 6. ✅ Add const correctness
 7. ✅ Add override keywords
 
-### Phase 2: Security (This Week)
-8. ❌ Script command validation
-9. ❌ Path traversal protection
+### Phase 2: Security (This Week) - ✅ COMPLETE
+8. ✅ Script command validation
+9. ✅ Path traversal protection
 
 ### Phase 3: Quality (Next Week)
 10. ❌ RAII wrappers

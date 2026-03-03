@@ -1,6 +1,7 @@
 #include "hyprbar/widgets/script_widget.h"
 #include "hyprbar/core/config_manager.h"
 #include "hyprbar/core/logger.h"
+#include "hyprbar/core/security_validator.h"
 #include "hyprbar/rendering/renderer.h"
 #include <array>
 #include <cstdio>
@@ -33,6 +34,13 @@ bool ScriptWidget::initialize(const ConfigValue& config) {
   }
 
   command_ = obj.at("command").string_value;
+
+  // Validate command for security
+  if (!SecurityValidator::is_safe_command(command_)) {
+    Logger::instance().error(
+        "Script widget command failed security validation: {}", command_);
+    return false;
+  }
 
   if (obj.count("interval")) {
     const auto& interval_val = obj.at("interval");
