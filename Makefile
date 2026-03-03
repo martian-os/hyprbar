@@ -101,11 +101,11 @@ clean:
 	@echo "Clean complete"
 
 # Debug build (with debug symbols, no optimization)
-debug: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -g -O0 -Iinclude
+debug: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -g -O0 -Iinclude $(shell pkg-config --cflags pangocairo dbus-1 gdk-pixbuf-2.0)
 debug: clean all
 
 # Release build (optimized)
-release: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O3 -DNDEBUG -Iinclude
+release: CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O3 -DNDEBUG -Iinclude $(shell pkg-config --cflags pangocairo dbus-1 gdk-pixbuf-2.0)
 release: clean all
 
 # Show help
@@ -232,6 +232,7 @@ TSAN_FLAGS = -fsanitize=thread -g -O1
 test-asan:
 	@echo "🧪 Building and running tests with AddressSanitizer..."
 	@$(MAKE) clean
+	@$(MAKE) dirs
 	@CXXFLAGS="$(CXXFLAGS) $(ASAN_FLAGS)" LDFLAGS="$(LDFLAGS) $(ASAN_FLAGS)" $(MAKE) $(TEST_TARGET)
 	@ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 $(TEST_TARGET)
 	@echo "✅ AddressSanitizer tests passed"
@@ -239,6 +240,7 @@ test-asan:
 test-tsan:
 	@echo "🧪 Building and running tests with ThreadSanitizer..."
 	@$(MAKE) clean
+	@$(MAKE) dirs
 	@CXXFLAGS="$(CXXFLAGS) $(TSAN_FLAGS)" LDFLAGS="$(LDFLAGS) $(TSAN_FLAGS)" $(MAKE) $(TEST_TARGET)
 	@TSAN_OPTIONS=halt_on_error=1 $(TEST_TARGET)
 	@echo "✅ ThreadSanitizer tests passed"
