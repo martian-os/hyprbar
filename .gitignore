@@ -30,3 +30,13 @@ coverage*.out
 # Profiling
 *.prof
 *.pprof
+
+# Test coverage
+coverage/
+coverage.info
+*.gcda
+*.gcno
+*.gcov
+
+# Mock configs
+/tmp/mock_*

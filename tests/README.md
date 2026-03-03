@@ -1,160 +1,120 @@
-# Testing Strategy
+# Test Infrastructure with Mock Services
 
-## Current State
+## Overview
 
-**Total Tests:** 108 (all passing)
-**Coverage:** ~63% overall
+This directory contains test infrastructure for hyprbar, including mock services for external dependencies (D-Bus, Hyprland).
 
-### Widget Test Coverage
+## Test Modes
 
-#### Script Widget ✅
-- Initialization, configuration, updates
-- Render timing and dimensions
-- Font size affects width
-- **Coverage:** 78.9%
+### Fast Mode (Default for Pre-commit)
+```bash
+make test-fast
+```
+- Runs unit tests only
+- No external services required
+- Fast execution (~5-10 seconds for 118 tests)
+- Safe for pre-commit hooks
 
-#### Tray Widget ✅
-- Initialization, configuration
-- Dimensions, rendering (empty tray)
-- **Coverage:** 84.7%
-- **Note:** D-Bus integration not yet implemented
+### Mock Mode (Integration Tests)
+```bash
+make test-mocks
+```
+- Runs tests with mock D-Bus and Hyprland services
+- Slower but tests real integration
+- Isolated from system services
+- Use for comprehensive testing
 
-#### Hyprland Widget ⚠️
-- Config parsing (colors, max_workspaces)
-- Fallback without env var (zero width)
-- Default value handling
-- **Coverage:** ~30-35% (estimated)
-- **Limitation:** Socket communication not tested
+## Mock Services
 
-### What's Not Tested
-
-1. **Widget Manager** (0% coverage)
-   - Layout logic (left/center/right positioning)
-   - Widget spacing calculations
-   - Runs in main loop, needs refactoring
-
-2. **Wayland Integration** (0% coverage)
-   - Surface creation/destruction
-   - Event handling
-   - Protocol handshakes
-   - Requires compositor mock
-
-3. **Hyprland Widget IPC** (not tested)
-   - Socket connection logic
-   - JSON parsing of workspace data
-   - Event stream handling
-   - Requires mock server (see mock_hyprland_server.py)
-
-## Mock Infrastructure
-
-### Hyprland Mock Server
-
-`tests/mock_hyprland_server.py` - Simulates Hyprland IPC sockets
-
-**Features:**
-- Creates `.socket.sock` (command responses)
-- Creates `.socket2.sock` (event stream)
-- Responds to `j/workspaces` and `j/activeworkspace`
+### MockHyprland
+Simulates Hyprland compositor socket interface:
+- Command socket (`.socket.sock`)
+- Event socket (`.socket2.sock`)
+- Returns workspace JSON responses
+- Triggers workspace change events
 
 **Usage:**
-```bash
-# Start mock server
-python3 tests/mock_hyprland_server.py /tmp/mock_hypr/test_instance &
-
-# Set environment
-export HYPRLAND_INSTANCE_SIGNATURE=test_instance
-
-# Run tests
-./bin/test_hyprbar
-```
-
-**Status:** Created but not integrated into test suite (tests hang waiting for socket)
-
-### Future Mocks Needed
-
-1. **D-Bus Mock** - For tray widget StatusNotifierItem protocol
-2. **Wayland Compositor Mock** - For surface and protocol testing
-3. **Widget Manager Test Harness** - Extract layout logic for unit testing
-
-## Improving Coverage
-
-### Priority 1: Widget Manager (Quick Win)
-**Current:** 0% (174 lines)
-**Target:** >70%
-
-**Approach:**
-- Extract layout calculation into testable functions
-- Create `WidgetLayout` struct with position calculations
-- Test left/center/right positioning logic
-- Test spacing and widget arrangement
-
-**Example:**
 ```cpp
-struct WidgetLayout {
-  int x, y, width;
-};
+#include "test_mocks.h"
 
-std::vector<WidgetLayout> calculate_layout(
-  const std::vector<Widget*>& widgets,
-  int bar_width
-);
+// Create mock with 5 workspaces
+auto mock = test::mocks::create_hyprland_with_workspaces(5);
+
+// RAII guard handles start/stop
+test::mocks::MockGuard guard(mock);
+
+// Test your widget
+HyprlandWidget widget;
+widget.initialize(config);
 ```
 
-### Priority 2: Hyprland Widget Socket Logic
-**Current:** ~30%
-**Target:** >70%
+### MockDBus
+Simulates D-Bus StatusNotifierWatcher:
+- Registers tray items
+- Provides IconName and IconPixmap properties
+- Configurable via JSON
 
-**Approach:**
-- Fix mock server hanging issue
-- Add proper socket timeout handling
-- Test JSON parsing separately from socket I/O
-- Mock socket responses in tests
+**Usage:**
+```cpp
+// Create mock with 2 tray items
+auto mock = test::mocks::create_dbus_with_tray_items(2);
 
-### Priority 3: Wayland Integration
-**Current:** 0% (358 lines)
-**Target:** >50%
+// Auto-cleanup with guard
+test::mocks::MockGuard guard(mock);
 
-**Approach:**
-- Use `wl_display_connect(NULL)` mock
-- Test protocol object creation
-- Test surface configuration
-- Separate protocol logic from rendering
-
-## Running Coverage
-
-```bash
-# Generate coverage report
-make coverage
-
-# View detailed HTML report
-make coverage-report
-open coverage/html/index.html
-
-# Clean coverage data
-make coverage-clean
+// Test tray widget
+TrayWidget widget;
+widget.initialize(config);
 ```
 
-## Test File Organization
+## Files
 
-- `basic_test.cpp` - Basic infrastructure tests
-- `config_test.cpp` - Configuration parsing
-- `renderer_test.cpp` - Cairo rendering primitives
-- `style_test.cpp` - CSS-like style inheritance
-- `test_bar_config.cpp` - Bar configuration
-- `widget_test.cpp` - Script/Tray widget tests
-- `hyprland_widget_test.cpp` - Hyprland widget config tests
-- `test_main.cpp` - Test runner
-- `test_utils.h` - Test assertions and utilities
+- `test_mocks.h` - Mock service interface definitions
+- `test_mocks.cpp` - Mock service implementations
+- `mock_hyprland_server.py` - Python mock for Hyprland sockets
+- `mock_dbus_server.py` - Python mock for D-Bus services
+- `example_mock_test.cpp` - Example usage (standalone)
 
-## Known Issues
+## Adding New Tests
 
-1. **gcov version mismatch** - Clang 15 vs gcov 15 format incompatibility
-2. **Mock server hangs** - Socket tests need timeout handling
-3. **Wayland mock complexity** - Requires significant infrastructure
+### Unit Test (Fast)
+```cpp
+void test_my_feature() {
+  // No external services
+  MyWidget widget;
+  widget.initialize(config);
+  
+  test::assert(widget.works(), "Feature works");
+}
+```
 
-## Recommendations
+### Integration Test (Mocks)
+```cpp
+void test_with_dbus() {
+  auto mock = test::mocks::create_dbus_with_tray_items(1);
+  test::mocks::MockGuard guard(mock);
+  
+  TrayWidget widget;
+  widget.initialize(config);
+  
+  test::assert(widget.get_desired_width() > 0, "Has width");
+}
+```
 
-1. Extract testable logic from main loop (Widget Manager)
-2. Add JSON parsing unit tests (separate from I/O)
-3. Create lightweight mocks for external dependencies
-4. Add integration tests using screenshot comparison
+## Best Practices
+
+1. **Use fast tests by default** - Pre-commit hooks run fast tests only
+2. **Mock external services** - Don't rely on system D-Bus or Hyprland
+3. **Use RAII guards** - `MockGuard` ensures cleanup even on exceptions
+4. **Isolated tests** - Each test starts fresh mocks
+5. **Check test mode** - Use `HYPRBAR_TEST_MODE` env var to control behavior
+
+## Pre-commit Hook
+
+The pre-commit hook runs `make test-fast` which:
+- Skips D-Bus/Hyprland integration tests
+- Completes in ~10 seconds
+- Only runs pure unit tests
+- No external service dependencies
+
+For full integration testing, run `make test-mocks` manually.

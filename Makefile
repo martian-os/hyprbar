@@ -21,12 +21,12 @@ OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES)) \
 TARGET = $(BIN_DIR)/hyprbar
 
 # Test files
-TEST_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
-TEST_OBJECTS = $(TEST_SOURCES:$(TEST_DIR)/%.cpp=$(BUILD_DIR)/test_%.o)
+TEST_SOURCES = $(filter-out $(TEST_DIR)/example_mock_test.cpp $(TEST_DIR)/test_mocks.cpp, $(wildcard $(TEST_DIR)/*.cpp))
+TEST_OBJECTS = $(TEST_SOURCES:$(TEST_DIR)/%.cpp=$(BUILD_DIR)/test_%.o) $(BUILD_DIR)/test_mocks.o
 TEST_TARGET = $(BIN_DIR)/test_hyprbar
 
 # Phony targets
-.PHONY: all clean test install uninstall dirs
+.PHONY: all clean test test-fast test-integration test-mocks install uninstall dirs
 
 # Default target
 all: dirs $(TARGET)
@@ -53,18 +53,18 @@ $(BUILD_DIR)/protocol_%.o: $(PROTOCOL_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@gcc -fPIC -c $< -o $@
 
-# Test target
-test: dirs $(TEST_TARGET)
-	@echo "Running tests..."
-	@echo "Starting mock Hyprland server..."
-	@python3 tests/mock_hyprland_server.py /tmp/hypr_mock_test & \
-	MOCK_PID=$$! ; \
-	sleep 0.5 ; \
-	export HYPRLAND_INSTANCE_SIGNATURE=mock_test ; \
-	$(TEST_TARGET) ; \
-	TEST_RESULT=$$? ; \
-	kill $$MOCK_PID 2>/dev/null || true ; \
-	exit $$TEST_RESULT
+# Test target - fast unit tests only (no mocks, for pre-commit)
+test-fast: dirs $(TEST_TARGET)
+	@echo "Running fast unit tests (no mocks)..."
+	@HYPRBAR_TEST_MODE=fast $(TEST_TARGET)
+
+# Test with mocks - full integration tests
+test-mocks: dirs $(TEST_TARGET)
+	@echo "Running tests with mock services..."
+	@HYPRBAR_TEST_MODE=mocks $(TEST_TARGET)
+
+# Full test suite (both fast and mocks)
+test: test-fast
 
 # Build test executable
 $(TEST_TARGET): $(TEST_OBJECTS) $(filter-out $(BUILD_DIR)/main.o,$(OBJECTS))
@@ -74,6 +74,11 @@ $(TEST_TARGET): $(TEST_OBJECTS) $(filter-out $(BUILD_DIR)/main.o,$(OBJECTS))
 # Compile test files
 $(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp
 	@echo "Compiling test $<..."
+	@$(CXX) $(CXXFLAGS) -I$(SRC_DIR) -c $< -o $@
+
+# Compile test mocks (not following test_* pattern)
+$(BUILD_DIR)/test_mocks.o: $(TEST_DIR)/test_mocks.cpp
+	@echo "Compiling test mocks..."
 	@$(CXX) $(CXXFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 # Install target
