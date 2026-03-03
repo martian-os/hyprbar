@@ -113,6 +113,9 @@ help:
 	@echo "Hyprbar Makefile targets:"
 	@echo "  all          - Build the project (default)"
 	@echo "  test         - Build and run unit tests"
+	@echo "  test-fast    - Run fast unit tests only"
+	@echo "  test-asan    - Run tests with AddressSanitizer"
+	@echo "  test-tsan    - Run tests with ThreadSanitizer"
 	@echo "  integration  - Run integration tests (all configs)"
 	@echo "  clean        - Remove build artifacts"
 	@echo "  debug        - Build with debug symbols"
@@ -121,6 +124,11 @@ help:
 	@echo "  uninstall    - Remove from /usr/local/bin"
 	@echo "  format       - Auto-format all C++ files"
 	@echo "  format-check - Check code formatting"
+	@echo "  lint-tidy    - Run clang-tidy static analysis"
+	@echo "  lint-cppcheck - Run cppcheck"
+	@echo "  quality-fast - Fast quality checks (format + tidy)"
+	@echo "  quality-full - Full quality gate (all checks + coverage)"
+	@echo "  coverage     - Generate test coverage report"
 	@echo "  help         - Show this help message"
 
 # Integration tests (test all example configs)
@@ -190,3 +198,47 @@ coverage-clean:
 	@rm -rf coverage
 	@find $(BUILD_DIR) -name '*.gcda' -o -name '*.gcno' -delete 2>/dev/null || true
 	@echo "Coverage data cleaned"
+
+# Static analysis
+.PHONY: lint-tidy lint-cppcheck quality-fast quality-full
+
+lint-tidy:
+	@echo "🔍 Running clang-tidy..."
+	@find src tests -name '*.cpp' | xargs clang-tidy --config-file=.clang-tidy \
+		-- -std=c++17 -I include $(shell pkg-config --cflags wayland-client cairo pangocairo dbus-1 gdk-pixbuf-2.0)
+
+lint-cppcheck:
+	@echo "🔍 Running cppcheck..."
+	@cppcheck --enable=all --inconclusive --std=c++17 \
+		--suppress=missingIncludeSystem \
+		--suppress=unusedFunction \
+		--suppress=unmatchedSuppression \
+		--inline-suppr \
+		--error-exitcode=1 \
+		-I include src/
+
+quality-fast: format-check lint-tidy
+	@echo "✅ Fast quality checks passed"
+
+quality-full: format-check lint-tidy lint-cppcheck test-asan coverage
+	@echo "✅ Full quality gate passed"
+
+# Memory safety tests
+.PHONY: test-asan test-tsan
+
+ASAN_FLAGS = -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -g -O1
+TSAN_FLAGS = -fsanitize=thread -g -O1
+
+test-asan:
+	@echo "🧪 Building and running tests with AddressSanitizer..."
+	@$(MAKE) clean
+	@CXXFLAGS="$(CXXFLAGS) $(ASAN_FLAGS)" LDFLAGS="$(LDFLAGS) $(ASAN_FLAGS)" $(MAKE) $(TEST_TARGET)
+	@ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 $(TEST_TARGET)
+	@echo "✅ AddressSanitizer tests passed"
+
+test-tsan:
+	@echo "🧪 Building and running tests with ThreadSanitizer..."
+	@$(MAKE) clean
+	@CXXFLAGS="$(CXXFLAGS) $(TSAN_FLAGS)" LDFLAGS="$(LDFLAGS) $(TSAN_FLAGS)" $(MAKE) $(TEST_TARGET)
+	@TSAN_OPTIONS=halt_on_error=1 $(TEST_TARGET)
+	@echo "✅ ThreadSanitizer tests passed"

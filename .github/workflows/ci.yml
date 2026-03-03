@@ -44,9 +44,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install clang-format
-        run: sudo apt-get install -y clang-format
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang clang-format clang-tidy cppcheck libwayland-dev libcairo2-dev libpango1.0-dev libdbus-1-dev libgdk-pixbuf2.0-dev librsvg2-dev
 
       - name: Check code formatting
         run: |
           find src tests -name '*.cpp' -o -name '*.h' | xargs clang-format --dry-run --Werror
+
+      - name: Run clang-tidy
+        run: make lint-tidy
+
+      - name: Run cppcheck
+        run: make lint-cppcheck
+
+  memory-safety:
+    name: Memory Safety Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang libwayland-dev libcairo2-dev libpango1.0-dev libdbus-1-dev libgdk-pixbuf2.0-dev librsvg2-dev make file
+
+      - name: Test with AddressSanitizer
+        run: make test-asan
+
+      - name: Test with ThreadSanitizer
+        run: make test-tsan
