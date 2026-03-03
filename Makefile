@@ -56,6 +56,7 @@ $(BUILD_DIR)/protocol_%.o: $(PROTOCOL_DIR)/%.c
 # Test target - fast unit tests only (no mocks, for pre-commit)
 test-fast: dirs $(TEST_TARGET)
 	@echo "Running fast unit tests (no mocks)..."
+	@./tests/test_root_clean.sh
 	@HYPRBAR_TEST_MODE=fast $(TEST_TARGET)
 
 # Test with mocks - full integration tests

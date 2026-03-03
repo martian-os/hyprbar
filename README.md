@@ -405,8 +405,38 @@ System tray for StatusNotifierItem (SNI) icons.
 }
 ```
 
-**Status:** Stub implementation
-- D-Bus integration pending (needs libdbus/sd-bus)
-- Currently renders placeholders
-- Full implementation coming soon
+**Status:** ✅ Fully implemented
+- D-Bus StatusNotifierItem integration
+- Icon theme loading (gdk-pixbuf + librsvg)
+- Supports both IconName (theme) and IconPixmap (embedded)
+- Auto-discovers tray items
+- Renders real system icons
 
+
+## Documentation
+
+- **[Architecture Review](docs/ARCHITECTURE_REVIEW.md)** - System design and component overview
+- **[Coverage Report](docs/COVERAGE_REPORT.md)** - Test coverage analysis
+- **[Test Infrastructure](tests/README.md)** - Mock services and testing guide
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `make test-fast`
+5. Format code: `make format`
+6. Submit a pull request
+
+Pre-commit hooks will automatically:
+- Check code formatting (clang-format)
+- Build the project
+- Run fast unit tests (~15 seconds)
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Credits
+
+Built by the Martian OS team.
