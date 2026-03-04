@@ -21,34 +21,6 @@ The codebase is now production-ready with:
 
 ---
 
-## Issues Resolved
-
-### ✅ Phase 1: Critical Fixes
-1. Struct/class mismatch - Fixed
-2. Constructor initialization order - Verified correct
-3. Unused variables - Removed
-4. D-Bus null checks - Added (3 locations)
-5. Const correctness - Verified
-6. Override keywords - Verified
-
-**Commits:** 6a2a9d9
-
-### ✅ Phase 2: Security
-1. Script command validation - SecurityValidator class added
-2. Path traversal protection - Canonical path resolution
-
-**Commits:** 0296951
-
-### ✅ Phase 3: Quality Improvements
-1. **Use-after-free in event loop** - Fixed with deferred fd removal
-2. **RAII violations** - GLib smart pointers (GErrorPtr, GObjectPtr)
-3. **Exception safety** - Added noexcept specifications
-4. **Raw pointer API** - Verified: no issues (already using unique_ptr)
-
-**Commits:** 983a53c
-
----
-
 ## Phase 4: Future Architectural Improvements (Optional)
 
 The following are **not critical** and can be addressed when time allows:
@@ -149,12 +121,3 @@ Hyprbar is now a well-engineered, production-ready codebase with:
 - User customization is requested (4.8)
 
 The foundation is solid. Ship it! 🚀
-
----
-
-**Commits:**
-- 6a2a9d9: Phase 1 (Critical fixes + D-Bus null checks)
-- 0296951: Phase 2 (Security validation)
-- 983a53c: Phase 3 (Quality improvements)
-- 7218cee: CI fixes
-- daca801: Documentation updates
