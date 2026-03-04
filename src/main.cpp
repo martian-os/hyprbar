@@ -168,6 +168,17 @@ int run_wayland_mode(ConfigManager& config_mgr) {
   app.widget_manager = std::make_unique<WidgetManager>();
   app.widget_manager->initialize(config_mgr);
 
+  // Setup pointer button handler
+  app.wayland->set_pointer_button_callback(
+      [](uint32_t button, uint32_t state, int x, int y) {
+        // Only handle button press (state == 1)
+        if (state == 1 && app.widget_manager) {
+          Logger::instance().debug("Pointer button {} pressed at ({}, {})",
+                                   button, x, y);
+          app.widget_manager->on_click(x, y, button);
+        }
+      });
+
   // Setup event loop
   app.event_loop = std::make_unique<EventLoop>();
 

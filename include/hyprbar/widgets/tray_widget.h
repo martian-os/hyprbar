@@ -42,6 +42,8 @@ public:
     return "tray";
   }
 
+  void on_click(int x, int y, uint32_t button) noexcept override;
+
 private:
   struct TrayIcon {
     std::string service;
@@ -57,6 +59,8 @@ private:
   void dbus_listener_thread();
   void fetch_tray_items();
   void fetch_icon_data(TrayIcon& icon);
+  void activate_tray_icon(const std::string& service, const std::string& path,
+                          int x, int y);
   cairo_surface_t* load_icon_from_theme(const std::string& icon_name, int size);
   cairo_surface_t* pixbuf_to_cairo_surface(GdkPixbuf* pixbuf);
 

@@ -627,4 +627,60 @@ void TrayWidget::fetch_icon_data(TrayIcon& icon) {
   dbus_connection_unref(conn);
 }
 
+void TrayWidget::on_click(int x, int /*y*/, uint32_t button) noexcept {
+  std::lock_guard<std::mutex> lock(icons_mutex_);
+
+  // Find which icon was clicked
+  int current_x = 0;
+  for (const auto& icon : icons_) {
+    if (x >= current_x && x < current_x + icon_size_) {
+      Logger::instance().info("Clicked tray icon: {} (button {})", icon.service,
+                              button);
+
+      // Activate the icon (will trigger menu or default action)
+      // Note: We can't use x/y here because we're in noexcept context
+      // and don't have proper error handling for D-Bus. Instead, we'll
+      // just call Activate with dummy coordinates.
+      activate_tray_icon(icon.service, icon.path, x, 0);
+      return;
+    }
+    current_x += icon_size_ + icon_spacing_;
+  }
+}
+
+void TrayWidget::activate_tray_icon(const std::string& service,
+                                    const std::string& path, int x, int y) {
+  DBusError err;
+  dbus_error_init(&err);
+
+  DBusConnection* conn = dbus_bus_get(DBUS_BUS_SESSION, &err);
+  if (dbus_error_is_set(&err) || !conn) {
+    Logger::instance().error("Failed to connect to D-Bus: {}",
+                             dbus_error_is_set(&err) ? err.message
+                                                     : "no connection");
+    dbus_error_free(&err);
+    return;
+  }
+
+  // Try ContextMenu method (will show menu at coordinates)
+  DBusMessage* msg =
+      dbus_message_new_method_call(service.c_str(), path.c_str(),
+                                   "org.kde.StatusNotifierItem", "ContextMenu");
+
+  if (msg) {
+    dbus_message_append_args(msg, DBUS_TYPE_INT32, &x, DBUS_TYPE_INT32, &y,
+                             DBUS_TYPE_INVALID);
+
+    // Send with no reply expected
+    dbus_connection_send(conn, msg, nullptr);
+    dbus_connection_flush(conn);
+    dbus_message_unref(msg);
+
+    Logger::instance().debug("Sent ContextMenu to {} at ({}, {})", service, x,
+                             y);
+  }
+
+  dbus_connection_unref(conn);
+}
+
 } // namespace hyprbar
