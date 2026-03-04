@@ -662,22 +662,83 @@ void TrayWidget::activate_tray_icon(const std::string& service,
     return;
   }
 
-  // Try ContextMenu method (will show menu at coordinates)
-  DBusMessage* msg =
-      dbus_message_new_method_call(service.c_str(), path.c_str(),
-                                   "org.kde.StatusNotifierItem", "ContextMenu");
+  // Strategy: Try multiple activation methods (different implementations
+  // support different methods)
+  // 1. Activate (primary action, KDE standard)
+  // 2. ContextMenu (show menu, KDE standard)
+  // 3. SecondaryActivate (middle-click, Ayatana/Ubuntu)
 
+  bool success = false;
+
+  // Try 1: Activate method (left-click action)
+  DBusMessage* msg = dbus_message_new_method_call(
+      service.c_str(), path.c_str(), "org.kde.StatusNotifierItem", "Activate");
   if (msg) {
     dbus_message_append_args(msg, DBUS_TYPE_INT32, &x, DBUS_TYPE_INT32, &y,
                              DBUS_TYPE_INVALID);
 
-    // Send with no reply expected
-    dbus_connection_send(conn, msg, nullptr);
-    dbus_connection_flush(conn);
+    DBusMessage* reply =
+        dbus_connection_send_with_reply_and_block(conn, msg, 500, &err);
     dbus_message_unref(msg);
 
-    Logger::instance().debug("Sent ContextMenu to {} at ({}, {})", service, x,
-                             y);
+    if (!dbus_error_is_set(&err) && reply) {
+      Logger::instance().debug("Sent Activate to {}", service);
+      dbus_message_unref(reply);
+      success = true;
+    }
+    dbus_error_free(&err);
+  }
+
+  // Try 2: ContextMenu method
+  if (!success) {
+    dbus_error_init(&err);
+    msg = dbus_message_new_method_call(service.c_str(), path.c_str(),
+                                       "org.kde.StatusNotifierItem",
+                                       "ContextMenu");
+    if (msg) {
+      dbus_message_append_args(msg, DBUS_TYPE_INT32, &x, DBUS_TYPE_INT32, &y,
+                               DBUS_TYPE_INVALID);
+
+      DBusMessage* reply =
+          dbus_connection_send_with_reply_and_block(conn, msg, 500, &err);
+      dbus_message_unref(msg);
+
+      if (!dbus_error_is_set(&err) && reply) {
+        Logger::instance().debug("Sent ContextMenu to {}", service);
+        dbus_message_unref(reply);
+        success = true;
+      }
+      dbus_error_free(&err);
+    }
+  }
+
+  // Try 3: SecondaryActivate (Ayatana/Ubuntu fallback)
+  if (!success) {
+    dbus_error_init(&err);
+    msg = dbus_message_new_method_call(service.c_str(), path.c_str(),
+                                       "org.kde.StatusNotifierItem",
+                                       "SecondaryActivate");
+    if (msg) {
+      dbus_message_append_args(msg, DBUS_TYPE_INT32, &x, DBUS_TYPE_INT32, &y,
+                               DBUS_TYPE_INVALID);
+
+      DBusMessage* reply =
+          dbus_connection_send_with_reply_and_block(conn, msg, 500, &err);
+      dbus_message_unref(msg);
+
+      if (!dbus_error_is_set(&err) && reply) {
+        Logger::instance().debug("Sent SecondaryActivate to {}", service);
+        dbus_message_unref(reply);
+        success = true;
+      }
+      dbus_error_free(&err);
+    }
+  }
+
+  if (!success) {
+    Logger::instance().warn(
+        "Failed to activate tray icon {} - no supported methods responded",
+        service);
   }
 
   dbus_connection_unref(conn);
