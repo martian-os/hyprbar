@@ -77,6 +77,8 @@ private:
   };
 
   std::vector<WidgetSlot> widgets_;
+  int spacing_ = 10; // Widget spacing (from bar config)
+  int margin_ = 10;  // Bar edge margin (from bar config)
 };
 
 } // namespace hyprbar

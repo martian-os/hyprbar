@@ -322,6 +322,14 @@ bool ConfigManager::parse_bar_config(const ConfigValue& value) {
     }
   }
 
+  if (auto margin = value.get("margin")) {
+    config_.bar.margin = static_cast<int>(margin->as_int());
+  }
+
+  if (auto spacing = value.get("spacing")) {
+    config_.bar.spacing = static_cast<int>(spacing->as_int());
+  }
+
   return true;
 }
 

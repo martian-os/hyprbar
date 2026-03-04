@@ -28,6 +28,10 @@ std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
 bool WidgetManager::initialize(const ConfigManager& config_mgr) {
   const auto& config = config_mgr.get_config();
 
+  // Get bar layout config
+  spacing_ = config.bar.spacing;
+  margin_ = config.bar.margin;
+
   // Get bar defaults for widget inheritance
   std::string default_font_family = config.bar.font;
   double default_font_size = config.bar.size;
@@ -151,8 +155,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
 
   Logger::instance().debug("Rendering {} widgets", widgets_.size());
 
-  const int spacing = 10;
-  const int margin = 10;
+  const int spacing = spacing_;
+  const int margin = margin_;
 
   // Separate widgets by position
   std::vector<WidgetSlot*> left_widgets;

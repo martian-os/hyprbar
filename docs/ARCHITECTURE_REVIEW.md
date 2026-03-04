@@ -67,11 +67,14 @@ The following are **not critical** and can be addressed when time allows:
 **Benefit:** Swappable text engines  
 **Priority:** Low (Pango works well, no need to swap)
 
-### 4.8 Magic Numbers
-**Current:** Hardcoded spacing, margin values  
-**Future:** Named constants or config  
-**Benefit:** Self-documenting, easier to adjust  
-**Priority:** Low (consider if users request customization)
+### 4.8 Magic Numbers ✅
+**Previous:** Hardcoded spacing, margin values  
+**Implemented:** Named config attributes following CSS conventions  
+**Config attributes:**
+- Bar level: `margin` (edge spacing), `spacing` (widget gap)
+- Widget level: widget-specific layout properties (e.g., hyprland `button_width`, `spacing`)
+**Benefit:** User-customizable, self-documenting  
+**Status:** ✅ Complete (2026-03-04)
 
 ---
 
