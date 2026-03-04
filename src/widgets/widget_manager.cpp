@@ -8,6 +8,46 @@
 #include <chrono>
 #include <thread>
 
+namespace {
+
+/**
+ * Draw per-widget CSS decorations (background, border, border-radius)
+ * before the widget renders its own content.
+ *
+ * padding expands the decoration box outward from the widget bounds,
+ * matching the CSS box model where padding is inside the border.
+ */
+void render_widget_decorations(hyprbar::Renderer& renderer,
+                               const hyprbar::WidgetStyle& style, int x, int y,
+                               int w, int h) {
+  // Expand box by padding
+  int p = style.padding;
+  double bx = x - p;
+  double by = y - p;
+  double bw = w + 2 * p;
+  double bh = h + 2 * p;
+  double br = static_cast<double>(style.border_radius);
+
+  // Draw background if set
+  if (!style.background.empty()) {
+    auto bg = hyprbar::Color::from_hex(style.background);
+    if (br > 0.0) {
+      renderer.fill_rounded_rect(bx, by, bw, bh, br, bg);
+    } else {
+      renderer.fill_rect(bx, by, bw, bh, bg);
+    }
+  }
+
+  // Draw border if set
+  if (style.border_width > 0 && !style.border_color.empty()) {
+    auto bc = hyprbar::Color::from_hex(style.border_color);
+    renderer.stroke_rounded_rect(bx, by, bw, bh, br,
+                                 static_cast<double>(style.border_width), bc);
+  }
+}
+
+} // anonymous namespace
+
 namespace hyprbar {
 
 std::unique_ptr<Widget> WidgetManager::create_widget(const std::string& type) {
@@ -92,6 +132,7 @@ bool WidgetManager::initialize(const ConfigManager& config_mgr) {
     slot.y = 0;
     slot.width = 0;
     slot.height = 0;
+    slot.style = widget_config.style;
     widgets_.push_back(std::move(slot));
   }
 
@@ -218,6 +259,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
     slot->height = widget_height;
 
     Logger::instance().debug("Left widget at x={}, width={}", x, widget_width);
+    render_widget_decorations(renderer, slot->style, x, 0, widget_width,
+                              bar_height);
     slot->widget->render(renderer, x, 0, widget_width, bar_height);
 
     x += widget_width + spacing;
@@ -239,6 +282,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
 
       Logger::instance().debug("Center widget at x={}, width={}", x,
                                widget_width);
+      render_widget_decorations(renderer, slot->style, x, 0, widget_width,
+                                bar_height);
       slot->widget->render(renderer, x, 0, widget_width, bar_height);
 
       x += widget_width + spacing;
@@ -261,6 +306,8 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
 
       Logger::instance().debug("Right widget at x={}, width={}", x,
                                widget_width);
+      render_widget_decorations(renderer, slot->style, x, 0, widget_width,
+                                bar_height);
       slot->widget->render(renderer, x, 0, widget_width, bar_height);
 
       x += widget_width + spacing;

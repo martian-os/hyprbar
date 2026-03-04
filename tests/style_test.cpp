@@ -110,6 +110,57 @@ void test_style_attribute_names() {
   test::assert(widget_style.color.has_value(), "Widget has color");
 }
 
+void test_style_new_css_attributes() {
+  Style style;
+
+  // Defaults
+  test::assert(style.get_background() == "", "Default background empty");
+  test::assert(style.get_padding() == 0, "Default padding 0");
+  test::assert(style.get_border_radius() == 0, "Default border-radius 0");
+  test::assert(style.get_border_color() == "", "Default border-color empty");
+  test::assert(style.get_border_width() == 0, "Default border-width 0");
+
+  // Set values
+  style.background = "#313244";
+  style.padding = 6;
+  style.border_radius = 8;
+  style.border_color = "#89b4fa";
+  style.border_width = 2;
+
+  test::assert(style.get_background() == "#313244", "Custom background");
+  test::assert(style.get_padding() == 6, "Custom padding");
+  test::assert(style.get_border_radius() == 8, "Custom border-radius");
+  test::assert(style.get_border_color() == "#89b4fa", "Custom border-color");
+  test::assert(style.get_border_width() == 2, "Custom border-width");
+}
+
+void test_style_css_inheritance() {
+  Style parent;
+  parent.background = "#1e1e2e";
+  parent.padding = 4;
+  parent.border_radius = 6;
+  parent.border_color = "#45475a";
+  parent.border_width = 1;
+
+  // Child inherits all
+  Style child;
+  Style resolved = child.inherit_from(parent);
+  test::assert(resolved.get_background() == "#1e1e2e", "Inherited background");
+  test::assert(resolved.get_padding() == 4, "Inherited padding");
+  test::assert(resolved.get_border_radius() == 6, "Inherited border-radius");
+
+  // Child overrides just background and radius
+  Style child2;
+  child2.background = "#313244";
+  child2.border_radius = 12;
+  Style resolved2 = child2.inherit_from(parent);
+  test::assert(resolved2.get_background() == "#313244", "Override background");
+  test::assert(resolved2.get_border_radius() == 12, "Override border-radius");
+  test::assert(resolved2.get_padding() == 4, "Inherited padding unchanged");
+  test::assert(resolved2.get_border_color() == "#45475a",
+               "Inherited border-color");
+}
+
 void run_style_tests() {
   std::cout << "\n--- Style Tests ---" << std::endl;
   test_style_defaults();
@@ -119,4 +170,6 @@ void run_style_tests() {
   test_style_partial_override();
   test_style_completeness();
   test_style_attribute_names();
+  test_style_new_css_attributes();
+  test_style_css_inheritance();
 }

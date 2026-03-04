@@ -330,6 +330,22 @@ bool ConfigManager::parse_bar_config(const ConfigValue& value) {
     config_.bar.gap = static_cast<int>(gap->as_int());
   }
 
+  if (auto padding = value.get("padding")) {
+    config_.bar.padding = static_cast<int>(padding->as_int());
+  }
+
+  if (auto br = value.get("border-radius")) {
+    config_.bar.border_radius = static_cast<int>(br->as_int());
+  }
+
+  if (auto bc = value.get("border-color")) {
+    config_.bar.border_color = bc->as_string();
+  }
+
+  if (auto bw = value.get("border-width")) {
+    config_.bar.border_width = static_cast<int>(bw->as_int());
+  }
+
   return true;
 }
 
@@ -360,6 +376,37 @@ bool ConfigManager::parse_widgets(const ConfigValue& value) {
 
     if (auto cfg = widget_val.get("config")) {
       widget.config = *cfg;
+    }
+
+    // Parse CSS-like widget style from top-level widget object or "style"
+    // sub-object Supports both inline: {"background": "#..."} and nested:
+    // {"style": {"background": "#..."}}
+    auto parse_widget_style = [](const ConfigValue& src, WidgetStyle& style) {
+      if (auto bg = src.get("background")) {
+        style.background = bg->as_string();
+      }
+      if (auto p = src.get("padding")) {
+        style.padding = static_cast<int>(p->as_int());
+      }
+      if (auto br = src.get("border-radius")) {
+        style.border_radius = static_cast<int>(br->as_int());
+      }
+      if (auto bc = src.get("border-color")) {
+        style.border_color = bc->as_string();
+      }
+      if (auto bw = src.get("border-width")) {
+        style.border_width = static_cast<int>(bw->as_int());
+      }
+    };
+
+    // Check top-level widget object first
+    parse_widget_style(widget_val, widget.style);
+
+    // "style" sub-object takes precedence (more explicit)
+    if (auto style_obj = widget_val.get("style")) {
+      if (style_obj->is_object()) {
+        parse_widget_style(*style_obj, widget.style);
+      }
     }
 
     config_.widgets.push_back(widget);

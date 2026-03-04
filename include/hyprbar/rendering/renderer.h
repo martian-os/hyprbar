@@ -83,6 +83,22 @@ public:
   // Convenience drawing methods
   void clear(const Color& color);
   void fill_rect(double x, double y, double w, double h, const Color& color);
+
+  /**
+   * Draw a filled rounded rectangle (CSS: border-radius)
+   * @param radius Corner radius in pixels (0 = sharp corners)
+   */
+  void fill_rounded_rect(double x, double y, double w, double h, double radius,
+                         const Color& color);
+
+  /**
+   * Draw a stroked (outlined) rounded rectangle
+   * @param radius  Corner radius in pixels
+   * @param line_w  Line/border width in pixels
+   */
+  void stroke_rounded_rect(double x, double y, double w, double h,
+                           double radius, double line_w, const Color& color);
+
   void draw_text(const std::string& text, double x, double y,
                  const std::string& font, double size, const Color& color);
   void draw_surface(cairo_surface_t* source, double x, double y, double width,

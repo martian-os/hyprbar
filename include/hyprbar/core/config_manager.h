@@ -107,6 +107,20 @@ struct ConfigValue {
 
 /**
  * Bar configuration
+ *
+ * CSS-inspired attributes:
+ *   position      - bar position (top/bottom/left/right)
+ *   height        - bar height in pixels
+ *   background    - bar background color (#RRGGBB or #RRGGBBAA)
+ *   color         - default text/foreground color
+ *   font          - default font family
+ *   size          - default font size in pixels
+ *   margin        - outer gap between bar and screen edge (CSS: margin)
+ *   gap           - spacing between widgets (CSS: gap)
+ *   padding       - inner spacing inside the bar top/bottom (CSS: padding)
+ *   border_radius - bar corner rounding in pixels (CSS: border-radius)
+ *   border_color  - bar border color (#RRGGBB or #RRGGBBAA)
+ *   border_width  - bar border thickness in pixels (CSS: border-width)
  */
 struct BarConfig {
   enum class Position { Top, Bottom, Left, Right };
@@ -117,8 +131,32 @@ struct BarConfig {
   std::string color = "#cdd6f4"; // Renamed from 'foreground' for consistency
   std::string font = "monospace";
   double size = 14.0;
-  int margin = 10; // Bar edge margin (CSS: margin)
-  int gap = 10;    // Widget spacing (CSS: gap)
+  int margin = 10;       // Outer gap between bar and screen edge (CSS: margin)
+  int gap = 10;          // Widget spacing (CSS: gap)
+  int padding = 0;       // Inner spacing top/bottom (CSS: padding)
+  int border_radius = 0; // Corner rounding in pixels (CSS: border-radius)
+  std::string border_color = ""; // Border color (empty = no border)
+  int border_width = 0;          // Border thickness (CSS: border-width)
+};
+
+/**
+ * Widget style — CSS-inspired per-widget look overrides
+ *
+ *   background    - widget background color (#RRGGBB or #RRGGBBAA)
+ *   padding       - inner spacing in pixels (CSS: padding)
+ *   border_radius - corner rounding (CSS: border-radius)
+ *   border_color  - border color (CSS: border-color)
+ *   border_width  - border thickness (CSS: border-width)
+ *
+ * These are drawn by WidgetManager before calling widget->render(),
+ * so individual widget implementations don't need to handle them.
+ */
+struct WidgetStyle {
+  std::string background = ""; // empty = transparent (no background drawn)
+  int padding = 0;
+  int border_radius = 0;
+  std::string border_color = "";
+  int border_width = 0;
 };
 
 /**
@@ -130,6 +168,7 @@ struct WidgetConfig {
   std::string type;
   Position position = Position::Left;
   ConfigValue config;
+  WidgetStyle style; // CSS-like visual overrides drawn by WidgetManager
 };
 
 /**

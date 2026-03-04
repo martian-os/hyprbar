@@ -7,7 +7,11 @@
     "font": "Noto Sans, Noto Color Emoji",
     "size": 10,
     "margin": 10,
-    "gap": 10
+    "gap": 10,
+    "padding": 0,
+    "border-radius": 8,
+    "border-color": "#45475a",
+    "border-width": 1
   },
   "widgets": [
     {
@@ -17,6 +21,11 @@
         "command": "../widgets/date.sh",
         "interval": 1000,
         "color": "#89b4fa"
+      },
+      "style": {
+        "background": "#313244",
+        "padding": 4,
+        "border-radius": 6
       }
     },
     {
@@ -35,6 +44,13 @@
         "command": "../widgets/cpu.sh",
         "interval": 2000,
         "color": "#f38ba8"
+      },
+      "style": {
+        "background": "#3b0d0d88",
+        "padding": 4,
+        "border-radius": 6,
+        "border-color": "#f38ba855",
+        "border-width": 1
       }
     },
     {

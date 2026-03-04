@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hyprbar/core/config_manager.h"
 #include "widget.h"
 #include <memory>
 #include <string>
@@ -74,6 +75,7 @@ private:
     int y;
     int width;
     int height;
+    WidgetStyle style; // CSS visual overrides drawn before widget content
   };
 
   std::vector<WidgetSlot> widgets_;

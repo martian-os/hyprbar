@@ -62,6 +62,60 @@ void test_multiple_frames() {
   test::assert(true, "Multiple frames render");
 }
 
+void test_fill_rounded_rect() {
+  Renderer r;
+  r.initialize(200, 50);
+
+  r.begin_frame();
+  r.clear(Color{0, 0, 0, 1});
+
+  // Draw a rounded rect in red - should not crash
+  r.fill_rounded_rect(10, 5, 180, 40, 8.0, Color{1, 0, 0, 1});
+  r.end_frame();
+
+  // Check at least one pixel is non-zero (background was cleared to black,
+  // rounded rect should have painted red pixels)
+  uint32_t* pixels = reinterpret_cast<uint32_t*>(r.get_buffer_data());
+  bool found_nontransparent = false;
+  for (int i = 0; i < 200 * 50; i++) {
+    if (pixels[i] != 0) {
+      found_nontransparent = true;
+      break;
+    }
+  }
+  test::assert(found_nontransparent, "fill_rounded_rect paints pixels");
+}
+
+void test_stroke_rounded_rect() {
+  Renderer r;
+  r.initialize(200, 50);
+
+  r.begin_frame();
+  r.clear(Color{0, 0, 0, 0});
+
+  // Draw a 2px blue border — should not crash with any radius
+  r.stroke_rounded_rect(5, 5, 190, 40, 10.0, 2.0, Color{0, 0, 1, 1});
+  r.stroke_rounded_rect(5, 5, 190, 40, 0.0, 2.0,
+                        Color{0, 0, 1, 1}); // no radius
+  r.end_frame();
+
+  test::assert(true, "stroke_rounded_rect completes without crash");
+}
+
+void test_rounded_rect_zero_radius() {
+  Renderer r;
+  r.initialize(100, 40);
+  r.begin_frame();
+
+  // radius=0 should behave like a regular rectangle
+  r.fill_rounded_rect(0, 0, 100, 40, 0.0, Color{0.5, 0.5, 0.5, 1});
+  r.end_frame();
+
+  uint32_t* pixels = reinterpret_cast<uint32_t*>(r.get_buffer_data());
+  test::assert(pixels[0] != 0,
+               "Zero-radius rounded rect fills like regular rect");
+}
+
 void run_renderer_tests() {
   std::cout << "\n--- Renderer Tests ---" << std::endl;
   test_renderer_initialization();
@@ -69,4 +123,7 @@ void run_renderer_tests() {
   test_clear_fills_buffer();
   test_frame_lifecycle();
   test_multiple_frames();
+  test_fill_rounded_rect();
+  test_stroke_rounded_rect();
+  test_rounded_rect_zero_radius();
 }

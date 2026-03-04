@@ -1,6 +1,7 @@
 #include "hyprbar/rendering/renderer.h"
 #include "hyprbar/core/logger.h"
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -110,6 +111,47 @@ void Renderer::fill_rect(double x, double y, double w, double h,
   cairo_set_source_rgba(cr_, color.r, color.g, color.b, color.a);
   cairo_rectangle(cr_, x, y, w, h);
   cairo_fill(cr_);
+  cairo_restore(cr_);
+}
+
+// Helper: build a rounded-rect path in the current Cairo context.
+// r is clamped to half the smaller dimension so corners never overdraw.
+static void rounded_rect_path(cairo_t* cr, double x, double y, double w,
+                              double h, double r) {
+  r = std::min(r, std::min(w, h) / 2.0);
+  if (r <= 0.0) {
+    cairo_rectangle(cr, x, y, w, h);
+    return;
+  }
+  const double pi = M_PI;
+  cairo_new_sub_path(cr);
+  cairo_arc(cr, x + w - r, y + r, r, -pi / 2, 0);    // top-right
+  cairo_arc(cr, x + w - r, y + h - r, r, 0, pi / 2); // bottom-right
+  cairo_arc(cr, x + r, y + h - r, r, pi / 2, pi);    // bottom-left
+  cairo_arc(cr, x + r, y + r, r, pi, 3 * pi / 2);    // top-left
+  cairo_close_path(cr);
+}
+
+void Renderer::fill_rounded_rect(double x, double y, double w, double h,
+                                 double radius, const Color& color) {
+  cairo_save(cr_);
+  cairo_set_source_rgba(cr_, color.r, color.g, color.b, color.a);
+  rounded_rect_path(cr_, x, y, w, h, radius);
+  cairo_fill(cr_);
+  cairo_restore(cr_);
+}
+
+void Renderer::stroke_rounded_rect(double x, double y, double w, double h,
+                                   double radius, double line_w,
+                                   const Color& color) {
+  cairo_save(cr_);
+  cairo_set_source_rgba(cr_, color.r, color.g, color.b, color.a);
+  cairo_set_line_width(cr_, line_w);
+  // Inset by half the line width so the stroke lands inside the rect bounds
+  double inset = line_w / 2.0;
+  rounded_rect_path(cr_, x + inset, y + inset, w - line_w, h - line_w,
+                    radius - inset);
+  cairo_stroke(cr_);
   cairo_restore(cr_);
 }
 

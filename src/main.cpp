@@ -41,7 +41,27 @@ void render_frame(void* wayland_buffer) {
   app.renderer->begin_frame();
 
   Color bg = Color::from_hex(app.config.bar.background);
-  app.renderer->clear(bg);
+  int bar_radius = app.config.bar.border_radius;
+  if (bar_radius > 0) {
+    // Rounded bar: clear to transparent first, then draw the rounded shape
+    app.renderer->clear(Color(0, 0, 0, 0));
+    app.renderer->fill_rounded_rect(
+        0, 0, static_cast<double>(app.renderer->get_width()),
+        static_cast<double>(app.renderer->get_height()),
+        static_cast<double>(bar_radius), bg);
+  } else {
+    app.renderer->clear(bg);
+  }
+
+  // Draw bar border if configured
+  if (app.config.bar.border_width > 0 && !app.config.bar.border_color.empty()) {
+    Color bc = Color::from_hex(app.config.bar.border_color);
+    app.renderer->stroke_rounded_rect(
+        0, 0, static_cast<double>(app.renderer->get_width()),
+        static_cast<double>(app.renderer->get_height()),
+        static_cast<double>(bar_radius),
+        static_cast<double>(app.config.bar.border_width), bc);
+  }
 
   // Render widgets
   if (app.widget_manager) {
