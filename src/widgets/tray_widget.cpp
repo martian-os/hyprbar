@@ -149,24 +149,21 @@ int TrayWidget::get_desired_height() const noexcept {
 cairo_surface_t* TrayWidget::load_icon_from_theme(const std::string& icon_name,
                                                   int size) {
   // Generate icon name variants for fallback
-  // 1. Original name (e.g., "nm-signal-75")
-  // 2. With -symbolic suffix (e.g., "nm-signal-75-symbolic")
-  // 3. Without -symbolic if present (e.g., "nm-signal-75" from
-  // "nm-signal-75-symbolic")
+  // 1. Original name (e.g., "software-update-available")
+  // 2. Without -symbolic if present (strip it - prefer full-color)
+  // Note: We do NOT add -symbolic suffix - if the app wants symbolic,
+  // it should provide "icon-name-symbolic" as the IconName
   std::vector<std::string> icon_variants;
-  icon_variants.push_back(icon_name);
 
-  // Try with -symbolic suffix
-  if (icon_name.find("-symbolic") == std::string::npos) {
-    icon_variants.push_back(icon_name + "-symbolic");
-  }
-
-  // Try without -symbolic if present
+  // If icon name has -symbolic suffix, try without it first (prefer full-color)
   if (icon_name.size() >= 9 &&
       icon_name.substr(icon_name.size() - 9) == "-symbolic") {
     icon_variants.push_back(
         icon_name.substr(0, icon_name.length() - 9)); // Remove "-symbolic"
   }
+
+  // Always try the original name
+  icon_variants.push_back(icon_name);
 
   // Icon theme search paths (in priority order)
   std::vector<std::string> theme_paths = {
@@ -179,26 +176,38 @@ cairo_surface_t* TrayWidget::load_icon_from_theme(const std::string& icon_name,
           "/.local/share/icons"};
 
   // Subdirectories to search (common sizes and categories)
-  std::vector<std::string> subdirs = {"/symbolic/status/",
-                                      "/symbolic/apps/",
-                                      "/symbolic/categories/",
-                                      std::string("/") + std::to_string(size) +
-                                          "x" + std::to_string(size) +
-                                          "/status/",
-                                      std::string("/") + std::to_string(size) +
-                                          "x" + std::to_string(size) + "/apps/",
-                                      "/scalable/status/",
-                                      "/scalable/apps/",
-                                      "/24/status/",
-                                      "/24/apps/",
-                                      "/22/status/",
-                                      "/22/apps/",
-                                      "/16/status/",
-                                      "/16/apps/"};
+  // IMPORTANT: Search full-color icons FIRST, symbolic LAST (fallback)
+  std::vector<std::string> subdirs = {
+      // Exact size match (if available)
+      std::string("/") + std::to_string(size) + "x" + std::to_string(size) +
+          "/status/",
+      std::string("/") + std::to_string(size) + "x" + std::to_string(size) +
+          "/apps/",
+      // Common fixed sizes (full-color, PNGs)
+      "/24x24/status/",
+      "/24x24/apps/",
+      "/22x22/status/",
+      "/22x22/apps/",
+      "/16x16/status/",
+      "/16x16/apps/",
+      "/32x32/status/",
+      "/32x32/apps/",
+      "/48x48/status/",
+      "/48x48/apps/",
+      // Scalable (full-color, vector)
+      "/scalable/status/",
+      "/scalable/apps/",
+      // Symbolic (monochrome, last resort)
+      "/symbolic/status/",
+      "/symbolic/apps/",
+      "/symbolic/categories/",
+  };
 
   // Try all icon name variants
+  // Search strategy: For each VARIANT, exhaust all THEMES and SUBDIRS
+  // This ensures we prefer original name over symbolic, and Yaru full-color
+  // over Adwaita symbolic
   for (const auto& variant : icon_variants) {
-    // Try finding the icon file
     for (const auto& theme_path : theme_paths) {
       for (const auto& subdir : subdirs) {
         // Try SVG first
