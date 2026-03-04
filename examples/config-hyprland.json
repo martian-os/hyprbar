@@ -7,7 +7,7 @@
     "font": "Noto Sans, Noto Color Emoji",
     "size": 10,
     "margin": 10,
-    "spacing": 10
+    "gap": 10
   },
   "widgets": [
     {
@@ -18,8 +18,8 @@
         "active_color": "#89b4fa",
         "occupied_color": "#cdd6f4",
         "empty_color": "#45475a",
-        "button_width": 30,
-        "spacing": 5
+        "width": 30,
+        "gap": 5
       }
     },
     {

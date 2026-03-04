@@ -57,12 +57,12 @@ bool HyprlandWidget::initialize(const ConfigValue& config) {
     max_workspaces_ = static_cast<int>(obj.at("max_workspaces").as_int());
   }
 
-  if (obj.count("button_width")) {
-    button_width_ = static_cast<int>(obj.at("button_width").as_int());
+  if (obj.count("width")) {
+    width_ = static_cast<int>(obj.at("width").as_int());
   }
 
-  if (obj.count("spacing")) {
-    spacing_ = static_cast<int>(obj.at("spacing").as_int());
+  if (obj.count("gap")) {
+    gap_ = static_cast<int>(obj.at("gap").as_int());
   }
 
   // Fetch initial workspace state
@@ -104,13 +104,13 @@ void HyprlandWidget::render(Renderer& renderer, int x, int y, int /*width*/,
 
     renderer.draw_text(ws.name, current_x + 8, text_y, font_, font_size_, fg);
 
-    current_x += button_width_ + spacing_;
+    current_x += width_ + gap_;
   }
 }
 
 int HyprlandWidget::get_desired_width() const noexcept {
   std::lock_guard<std::mutex> lock(workspaces_mutex_);
-  return static_cast<int>(workspaces_.size()) * (button_width_ + spacing_);
+  return static_cast<int>(workspaces_.size()) * (width_ + gap_);
 }
 
 int HyprlandWidget::get_desired_height() const noexcept {

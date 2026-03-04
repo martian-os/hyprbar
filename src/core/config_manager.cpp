@@ -326,8 +326,8 @@ bool ConfigManager::parse_bar_config(const ConfigValue& value) {
     config_.bar.margin = static_cast<int>(margin->as_int());
   }
 
-  if (auto spacing = value.get("spacing")) {
-    config_.bar.spacing = static_cast<int>(spacing->as_int());
+  if (auto gap = value.get("gap")) {
+    config_.bar.gap = static_cast<int>(gap->as_int());
   }
 
   return true;

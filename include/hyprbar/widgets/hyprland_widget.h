@@ -53,8 +53,8 @@ private:
   std::string occupied_color_ = "#cdd6f4";
   std::string empty_color_ = "#45475a";
   int max_workspaces_ = 10;
-  int button_width_ = 30; // Width of each workspace button
-  int spacing_ = 5;       // Spacing between workspace buttons (CSS: gap)
+  int width_ = 30; // Width of each workspace button (CSS: width)
+  int gap_ = 5;    // Spacing between workspace buttons (CSS: gap)
 
   std::vector<Workspace> workspaces_;
   mutable std::mutex workspaces_mutex_;

@@ -117,8 +117,8 @@ struct BarConfig {
   std::string color = "#cdd6f4"; // Renamed from 'foreground' for consistency
   std::string font = "monospace";
   double size = 14.0;
-  int margin = 10;  // Bar edge margin (CSS: margin)
-  int spacing = 10; // Widget spacing (CSS: gap)
+  int margin = 10; // Bar edge margin (CSS: margin)
+  int gap = 10;    // Widget spacing (CSS: gap)
 };
 
 /**

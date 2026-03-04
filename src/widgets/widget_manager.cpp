@@ -29,7 +29,7 @@ bool WidgetManager::initialize(const ConfigManager& config_mgr) {
   const auto& config = config_mgr.get_config();
 
   // Get bar layout config
-  spacing_ = config.bar.spacing;
+  gap_ = config.bar.gap;
   margin_ = config.bar.margin;
 
   // Get bar defaults for widget inheritance
@@ -155,7 +155,7 @@ void WidgetManager::render(Renderer& renderer, int bar_width, int bar_height) {
 
   Logger::instance().debug("Rendering {} widgets", widgets_.size());
 
-  const int spacing = spacing_;
+  const int spacing = gap_;
   const int margin = margin_;
 
   // Separate widgets by position

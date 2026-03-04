@@ -7,7 +7,7 @@
     "font": "Noto Sans, Noto Color Emoji",
     "size": 10,
     "margin": 10,
-    "spacing": 10
+    "gap": 10
   },
   "widgets": [
     {
